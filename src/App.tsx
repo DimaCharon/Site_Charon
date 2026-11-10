@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { ArrowDownRight, ArrowUpRight, Asterisk, AudioWaveform, Bot, Braces, Code2, Cpu, Layers3, Menu, Sparkles, X, Zap } from 'lucide-react';
 import './styles.css';
 
-const PROFILE = { name: 'DIMA', telegram: '', email: '', github: '' };
+const PROFILE = { name: 'YOUR NAME', telegram: '', email: '', github: '' };
 const nav = [['Главная','home'],['Обо мне','about'],['Проекты','projects'],['Интересы','interests'],['Контакты','contact']];
 const areas = [
   ['AI & Machine Learning',Bot,'Изучаю новые модели, собираю AI-агентов и проверяю, где интеллект может стать полезным инструментом.'],
