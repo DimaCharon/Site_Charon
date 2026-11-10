@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { ArrowDownRight, ArrowUpRight, Asterisk, AudioWaveform, Bot, Braces, Code2, Cpu, Layers3, Menu, Sparkles, X, Zap } from 'lucide-react';
 import './styles.css';
 
+const MODEL_URL = `${import.meta.env.BASE_URL}models/charon-mascot.glb`;
 const PROFILE = { name: 'YOUR NAME', telegram: '', email: '', github: '' };
 const nav = [['Главная','home'],['Обо мне','about'],['Проекты','projects'],['Интересы','interests'],['Контакты','contact']];
 const areas = [
@@ -24,13 +25,13 @@ const projects = [
 const interests = [['Artificial Intelligence',Bot,'Модели · агенты · reasoning'],['Programming',Braces,'Инженерия · архитектура'],['Crypto Analytics',AudioWaveform,'Рынки · данные · гипотезы'],['Product Development',Layers3,'Идея → прототип → продукт'],['Digital Design',Sparkles,'Системы · визуальный язык'],['Automation',Zap,'Workflow · интеграции'],['New Technologies',Cpu,'Исследования · эксперименты']] as const;
 
 function Mascot() {
-  const { scene } = useGLTF('/models/charon-mascot.glb');
+  const { scene } = useGLTF(MODEL_URL);
   const ref = useRef<THREE.Group>(null);
   useEffect(() => { scene.traverse(o => { if ((o as THREE.Mesh).isMesh) { (o as THREE.Mesh).castShadow = true; (o as THREE.Mesh).receiveShadow = true; } }); }, [scene]);
   useFrame(({ pointer, clock }, dt) => { if (!ref.current) return; ref.current.rotation.y = THREE.MathUtils.damp(ref.current.rotation.y, pointer.x*.22 + Math.sin(clock.elapsedTime*.22)*.12, 3, dt); ref.current.rotation.x = THREE.MathUtils.damp(ref.current.rotation.x, -pointer.y*.1, 3, dt); ref.current.position.y = Math.sin(clock.elapsedTime*.7)*.045; });
   return <group ref={ref} position={[0,-1.75,0]} scale={1.03}><primitive object={scene}/></group>;
 }
-useGLTF.preload('/models/charon-mascot.glb');
+useGLTF.preload(MODEL_URL);
 
 function Stage() {
   return <div className="stage"><div className="orbit"/><div className="orbit orbit2"/><span className="stage-tag">✳ CORE KEEPER / ORIGINAL 3D</span><Canvas shadows dpr={[1,1.6]} camera={{position:[4.2,2.1,7.2],fov:33}}><ambientLight intensity={.85}/><directionalLight position={[4,7,5]} intensity={2.4} castShadow/><spotLight position={[-5,3,2]} intensity={38} color="#b8a4ff" angle={.5} penumbra={1}/><pointLight position={[0,1,-4]} intensity={18} color="#9b7cff"/><Mascot/><ContactShadows position={[0,-1.72,0]} opacity={.32} scale={5.8} blur={2.8}/><Environment preset="studio"/><OrbitControls enablePan={false} enableZoom={false} minPolarAngle={Math.PI/2.8} maxPolarAngle={Math.PI/1.8} rotateSpeed={.55}/></Canvas><span className="stage-bottom">DRAG TO ROTATE · ORIGINAL GEOMETRY</span></div>;
