@@ -1,2 +1,20 @@
-skills/
+# dependencies
 node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# env
+.env
+
+# runtime logs
+server.log
+dev.log
+
+# misc
+skills/
+upload/
+*.tsbuildinfo
+.DS_Store

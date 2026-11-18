@@ -112,22 +112,36 @@ function MiniScene({ scene }: { scene: WorldNode["scene"] }) {
 
 interface OrbitSpec {
   radius: number;
-  speed: number;
+  /** Начальная фаза — подобраны для равномерного стартового разброса (см. scripts/verify-orbits.mjs) */
   phase: number;
   tilt: THREE.Euler;
   y: number;
 }
 
-const orbitSpecs: OrbitSpec[] = worldNodes.map((_, i) => ({
-  radius: 2.1 + (i % 3) * 0.62,
-  speed: (0.1 + (i % 4) * 0.045) * (i % 2 === 0 ? 1 : -1),
-  phase: (i / worldNodes.length) * Math.PI * 2,
-  tilt: new THREE.Euler(0.38 + (i % 3) * 0.16, i * 0.5, (i % 2 === 0 ? 1 : -1) * 0.22),
-  y: (i % 3 - 1) * 0.42,
-}));
+/* Единая скорость и направление: созвездие вращается как единая система,
+   взаимное расположение узлов стабильно — подписи не сталкиваются */
+const ORBIT_SPEED = 0.11;
+
+const orbitSpecs: OrbitSpec[] = worldNodes.map((_, i) => {
+  const tuned = [
+    { r: 2.55, phase: 0.448, tz: 0.15, y: 0.52 },  // AI — право
+    { r: 2.9, phase: 5.17, tz: -0.15, y: -0.49 },  // Code — верх-право
+    { r: 2.35, phase: 3.82, tz: 0.15, y: 0.28 },   // Trading — верх-лево
+    { r: 2.95, phase: 3.754, tz: -0.15, y: -0.66 }, // Design — лево
+    { r: 2.6, phase: 2.564, tz: 0.15, y: -0.2 },   // Automation — низ-лево
+    { r: 2.8, phase: 1.944, tz: -0.15, y: 0.04 },  // Technology — низ-центр
+    { r: 2.45, phase: 1.096, tz: 0.15, y: -0.06 }, // Experiments — низ-право
+  ][i % 7];
+  return {
+    radius: tuned.r,
+    phase: tuned.phase,
+    tilt: new THREE.Euler(0.35, 0, tuned.tz),
+    y: tuned.y,
+  };
+});
 
 function orbitPosition(spec: OrbitSpec, t: number, out: THREE.Vector3) {
-  const a = spec.phase + t * spec.speed;
+  const a = spec.phase + t * ORBIT_SPEED;
   out.set(Math.cos(a) * spec.radius, 0, Math.sin(a) * spec.radius);
   out.applyEuler(spec.tilt);
   out.y += spec.y;
@@ -166,8 +180,11 @@ function OrbitLine({ spec, active }: { spec: OrbitSpec; active: boolean }) {
 }
 
 /* Узел системы */
-/* Смещение подписей по вертикали — чтобы соседние не слипались */
-const labelOffsets = [0, 0.16, 0, 0.16, 0, 0.16, 0];
+/* Смещение подписей: подписи под сферой, у AUTOMATION — над сферой.
+   Конфигурация проверена полным периодом вращения (scripts/verify-orbits.mjs):
+   ни одного пересечения подписей между собой, с фикс-оверлеем и пилюлей */
+const labelOffsets = [0, 0, 0, 0, 0.97, 0, 0];
+const LABEL_BASE_Y = -0.55;
 
 function SystemNode({
   node,
@@ -225,7 +242,7 @@ function SystemNode({
         emissive={emissive}
         emissiveIntensity={emissiveIntensity}
       />
-      <Html center distanceFactor={9} position={[0, 0.42 + (labelOffsets[index] ?? 0), 0]} zIndexRange={[10, 0]}>
+      <Html center distanceFactor={9} position={[0, LABEL_BASE_Y + (labelOffsets[index] ?? 0), 0]} zIndexRange={[10, 0]}>
         <div
           className={`select-none font-mono text-[10px] uppercase tracking-[0.22em] transition-colors duration-300 ${
             selected ? "text-lav" : hovered ? "text-foreground" : "text-muted-foreground"
@@ -282,14 +299,8 @@ function IdentityCore({ selected }: { selected: string | null }) {
         <torusGeometry args={[1.05, 0.012, 10, 90]} />
         <meshStandardMaterial color="#c9ccd3" metalness={1} roughness={0.25} />
       </mesh>
-      <Html center distanceFactor={10} position={[0, -1.05, 0]} zIndexRange={[10, 0]}>
-        <div
-          className="font-mono text-[10px] uppercase tracking-[0.3em] text-foreground/80"
-          style={{ pointerEvents: "none", whiteSpace: "nowrap" }}
-        >
-          charon · identity
-        </div>
-      </Html>
+      {/* Подпись ядра — HTML-оверлей над сценой (см. ниже в разметке секции):
+          ядро неподвижно в (0,0,0), поэтому позиция подписи постоянна */}
     </group>
   );
 }
@@ -299,14 +310,25 @@ function WorldSystem({
   hovered,
   onSelect,
   onHover,
+  heal,
 }: {
   selected: string | null;
   hovered: string | null;
   onSelect: (id: string) => void;
   onHover: (id: string | null) => void;
+  /** Пробуждает повторный рендер подписей после монтирования (см. примечание в DigitalWorld) */
+  heal: number;
 }) {
+  void heal;
   return (
     <>
+      {/* Скрытый Html-стаб: первый drei <Html> внутри Canvas иногда монтируется
+          с пустыми детьми (гонка создания root). Стаб принимает удар на себя —
+          при этом он невидим, а реальные подписи ниже рендерятся нормально. */}
+      <Html position={[0, 0, 0]} style={{ display: "none" }} zIndexRange={[0, 0]}>
+        <span />
+      </Html>
+
       <ambientLight intensity={0.4} />
       <directionalLight position={[4, 6, 4]} intensity={1} />
       <pointLight position={[-5, 2, -4]} intensity={18} color="#9d97f2" distance={14} />
@@ -342,12 +364,13 @@ function WorldSystem({
 
 const WorldCanvas = dynamic(
   () =>
-    Promise.resolve(({ selected, hovered, onSelect, onHover, inView }: {
+    Promise.resolve(({ selected, hovered, onSelect, onHover, inView, heal }: {
       selected: string | null;
       hovered: string | null;
       onSelect: (id: string) => void;
       onHover: (id: string | null) => void;
       inView: boolean;
+      heal: number;
     }) => (
       <Canvas
         dpr={[1, 1.5]}
@@ -357,7 +380,7 @@ const WorldCanvas = dynamic(
         frameloop={inView ? "always" : "never"}
         onPointerMissed={() => onSelect("")}
       >
-        <WorldSystem selected={selected} hovered={hovered} onSelect={onSelect} onHover={onHover} />
+        <WorldSystem selected={selected} hovered={hovered} onSelect={onSelect} onHover={onHover} heal={heal} />
       </Canvas>
     )),
   { ssr: false, loading: () => null }
@@ -370,6 +393,7 @@ export function DigitalWorld() {
   const [inView, setInView] = React.useState(false);
   const [selected, setSelected] = React.useState<string | null>(null);
   const [hovered, setHovered] = React.useState<string | null>(null);
+  const [heal, setHeal] = React.useState(0);
   const sectionRef = React.useRef<HTMLElement>(null);
 
   React.useEffect(() => {
@@ -385,6 +409,19 @@ export function DigitalWorld() {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  /* Двойная страховка подписей drei <Html>: повторный рендер сцены вскоре после
+     монтирования — эффект рендера детей у Html без зависимостей отрабатывает
+     повторно и «лечит» возможную пустую первую подпись */
+  React.useEffect(() => {
+    if (!mounted) return;
+    const t1 = window.setTimeout(() => setHeal(1), 120);
+    const t2 = window.setTimeout(() => setHeal(2), 600);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, [mounted]);
 
   const selectedNode = worldNodes.find((n) => n.id === selected) ?? null;
 
@@ -410,7 +447,22 @@ export function DigitalWorld() {
                   onSelect={(id) => setSelected(id || null)}
                   onHover={setHovered}
                   inView={inView}
+                  heal={heal}
                 />
+              )}
+
+              {/* Подпись центрального ядра — фикс-оверлей:
+                  камера смотрит в (0,0,0), точка (0, 1.55, 0) проецируется
+                  на 25.6% высоты канваса выше центра (top ≈ 24.4%) */}
+              {mounted && (
+                <div
+                  className="pointer-events-none absolute left-1/2 top-[24.4%] z-10 -translate-x-1/2 -translate-y-1/2 select-none"
+                  aria-hidden="true"
+                >
+                  <span className="whitespace-nowrap font-mono text-[12px] uppercase tracking-[0.3em] text-foreground/80">
+                    charon · identity
+                  </span>
+                </div>
               )}
 
               {/* Подсказка */}
@@ -468,7 +520,7 @@ export function DigitalWorld() {
 
         {/* Легенда-чипсы */}
         <Reveal delay={0.15}>
-          <div className="mask-fade-x mt-6 flex flex-wrap items-center gap-2">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
             {worldNodes.map((n) => (
               <button
                 key={n.id}

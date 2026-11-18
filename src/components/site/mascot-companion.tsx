@@ -54,23 +54,36 @@ function MascotFace({ size = 34 }: { size?: number }) {
 export function MascotCompanion({ active }: { active: boolean }) {
   const reduced = useReducedMotion();
   const [section, setSection] = React.useState("home");
-  const [collapsed, setCollapsed] = React.useState(false);
-  const [touched, setTouched] = React.useState(false);
+  const [manual, setManual] = React.useState<"expanded" | "collapsed" | null>(null);
+  const [atBottom, setAtBottom] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
 
   // На узких экранах маскот стартует свёрнутым — не перекрывает контент
   React.useEffect(() => {
-    if (touched) return;
     const mq = window.matchMedia("(max-width: 640px)");
-    const update = () => setCollapsed(mq.matches);
+    const update = () => setIsMobile(mq.matches);
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
-  }, [touched]);
+  }, []);
+
+  // У подвала сайта маскот сворачивается сам — не перекрывает футер
+  React.useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setAtBottom(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
+
+  const collapsed = manual !== null ? manual === "collapsed" : atBottom || isMobile;
 
   const toggle = React.useCallback(() => {
-    setTouched(true);
-    setCollapsed((c) => !c);
-  }, []);
+    setManual(collapsed ? "expanded" : "collapsed");
+  }, [collapsed]);
 
   React.useEffect(() => {
     const ids = Object.keys(states);

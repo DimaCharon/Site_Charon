@@ -369,6 +369,9 @@ function HorizontalProjects({ onOpen }: { onOpen: (p: Project) => void }) {
   const x = useTransform(scrollYProgress, [0, 1], [0, -range]);
   const bgX = useTransform(scrollYProgress, [0, 1], ["4%", "-24%"]);
   const barScale = useTransform(scrollYProgress, [0, 1], [0.06, 1]);
+  /* Индикатор прогресса мягко уходит при выходе из секции — без «остатка» сверху экрана */
+  const uiFade = useTransform(scrollYProgress, [0.84, 0.97], [1, 0]);
+  const uiLift = useTransform(scrollYProgress, [0.84, 0.97], [0, -36]);
 
   const featured = projects.find((p) => p.featured)!;
   const rest = projects.filter((p) => !p.featured);
@@ -440,14 +443,17 @@ function HorizontalProjects({ onOpen }: { onOpen: (p: Project) => void }) {
         </motion.div>
 
         {/* Индикатор прогресса */}
-        <div className="absolute inset-x-[8vw] bottom-10 flex items-center gap-4">
+        <motion.div
+          className="absolute inset-x-[8vw] bottom-10 flex items-center gap-4"
+          style={{ opacity: uiFade, y: uiLift }}
+        >
           <span className="font-mono text-[10px] tabular-nums tracking-[0.2em] text-muted-foreground">
             {String(projects.length).padStart(2, "0")} ПРОЕКТОВ
           </span>
           <div className="h-px flex-1 bg-line">
             <motion.div className="h-full origin-left bg-gradient-to-r from-lav to-blu" style={{ scaleX: barScale }} />
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -483,6 +489,7 @@ function StackedProjects({ onOpen }: { onOpen: (p: Project) => void }) {
 export function Projects() {
   const [isDesktop, setIsDesktop] = React.useState(false);
   const [selected, setSelected] = React.useState<Project | null>(null);
+  const reduced = useReducedMotion();
 
   React.useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
@@ -492,9 +499,12 @@ export function Projects() {
     return () => mq.removeEventListener("change", update);
   }, []);
 
+  /* При reduced motion — вертикальная раскладка вместо длинной sticky-секции */
+  const horizontal = isDesktop && !reduced;
+
   return (
     <>
-      {isDesktop ? (
+      {horizontal ? (
         <HorizontalProjects onOpen={setSelected} />
       ) : (
         <StackedProjects onOpen={setSelected} />
