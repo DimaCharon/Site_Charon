@@ -1,15 +1,20 @@
-import { useState } from "react";
+import { usePagingGesture } from "../hooks/gestures";
+import { useRef, useState } from "react";
 import {
   ScanLine,
-  Pencil,
+  LockKeyhole,
   ArrowDownRight,
   Fingerprint as FingerprintIcon,
 } from "lucide-react";
 import { directions } from "../config/site";
 import { Glyph, SectionLabel } from "./ui";
 import { Fingerprint } from "./Art";
-export function About({ name, onEdit }: { name: string; onEdit: () => void }) {
+export function About({ name }: { name: string }) {
   const [selected, setSelected] = useState(0);
+  const fields = useRef<HTMLDivElement>(null);
+  usePagingGesture(fields, (d) =>
+    setSelected((i) => (i + d + directions.length) % directions.length),
+  );
   const dir = directions[selected];
   return (
     <section
@@ -40,13 +45,11 @@ export function About({ name, onEdit }: { name: string; onEdit: () => void }) {
               <ScanLine size={15} />
               IDENTITY CARD
             </span>
-            <button
-              aria-label="Редактировать профиль"
-              title="Редактировать профиль"
-              onClick={onEdit}
-            >
-              <Pencil size={13} />
-            </button>
+            <LockKeyhole
+              size={12}
+              className="profile-seal"
+              aria-label="Профиль владельца"
+            />
           </div>
           <div className="id-name">{name}</div>
           <div className="id-role">Independent digital creator</div>
@@ -60,10 +63,10 @@ export function About({ name, onEdit }: { name: string; onEdit: () => void }) {
           <span className="id-corner" aria-hidden="true" />
         </div>
       </div>
-      <div className="direction-console reveal">
+      <div className="direction-console reveal" ref={fields}>
         <div className="direction-heading mono">
           <FingerprintIcon size={13} />
-          НАПРАВЛЕНИЯ<span>SELECT A FIELD</span>
+          НАПРАВЛЕНИЯ<span>SWIPE / SELECT</span>
         </div>
         <div
           className="direction-tabs"
@@ -80,7 +83,8 @@ export function About({ name, onEdit }: { name: string; onEdit: () => void }) {
               tabIndex={selected === i ? 0 : -1}
               className={selected === i ? "active" : ""}
               onPointerEnter={(e) => {
-                if (e.pointerType === "mouse") setSelected(i);
+                if (e.pointerType === "mouse" && e.buttons === 0)
+                  setSelected(i);
               }}
               onClick={() => setSelected(i)}
               onKeyDown={(e) => {

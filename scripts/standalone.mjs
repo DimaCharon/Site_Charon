@@ -1,5 +1,7 @@
 /** Build a portable, completely offline edition of the same interactive site. */
 import { build } from "vite";
+import { createHash } from "node:crypto";
+import { normalizeProfile } from "../shared/profile-schema.mjs";
 import react from "@vitejs/plugin-react";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -9,7 +11,14 @@ const result = await build({
   configFile: false,
   plugins: [react()],
   base: "./",
-  define: { __HAS_MASCOT__: JSON.stringify(hasMascot) },
+  define: {
+    __HAS_MASCOT__: JSON.stringify(hasMascot),
+    __CHARON_PROFILE__: JSON.stringify(
+      normalizeProfile(
+        JSON.parse(await readFile("public/identity.json", "utf8")),
+      ),
+    ),
+  },
   build: {
     write: false,
     modulePreload: false,
@@ -50,20 +59,20 @@ for (const name of ["manrope-cyrillic.woff2", "manrope-latin.woff2"]) {
     .replaceAll("../fonts/" + name, font)
     .replaceAll("./fonts/" + name, font);
 }
-const profile = (await readFile("public/identity.json", "utf8")).replaceAll(
-  "<",
-  "\\u003c",
-);
+const script = js.replace(/<\/script/gi, "<\\/script");
+const hash = createHash("sha256").update(script).digest("base64");
+const policy = `default-src 'none'; script-src 'sha256-${hash}'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src data: blob:; worker-src blob:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'`;
 html = html
+  .replace(
+    "<head>",
+    () =>
+      `<head><meta http-equiv="Content-Security-Policy" content="${policy}">`,
+  )
   .replace(/<script[^>]+src="[^"]+"[^>]*><\/script>/g, "")
   .replace(/<link[^>]+rel="(?:stylesheet|preload|modulepreload)"[^>]*>/g, "")
   .replace("./favicon.svg", await uri("public/favicon.svg", "image/svg+xml"))
   .replace("</head>", () => `<style>${css}</style></head>`)
-  .replace(
-    "</body>",
-    () =>
-      `<script type="application/json" id="charon-profile">${profile}</script><script type="module">${js.replace(/<\/script/gi, "<\\/script")}</script></body>`,
-  );
+  .replace("</body>", () => `<script type="module">${script}</script></body>`);
 await mkdir("out", { recursive: true });
 await writeFile("out/Charon.html", html);
 console.log(

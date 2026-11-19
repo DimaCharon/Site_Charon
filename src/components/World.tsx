@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { usePagingGesture } from "../hooks/gestures";
+import { useState, useRef } from "react";
 import { ArrowLeft, ArrowRight, Orbit } from "lucide-react";
 import { worlds } from "../config/site";
 import { SectionLabel, Corners } from "./ui";
 import { GenerativeArt } from "./Art";
 export function World({ name }: { name: string }) {
   const [selected, setSelected] = useState(0);
+  const surface = useRef<HTMLDivElement>(null);
+  usePagingGesture(surface, (d) =>
+    setSelected((i) => (i + d + worlds.length) % worlds.length),
+  );
   const node = worlds[selected];
   return (
     <section
@@ -12,7 +17,7 @@ export function World({ name }: { name: string }) {
       id="world"
       aria-labelledby="world-title"
     >
-      <div className="shell world-layout">
+      <div className="shell world-layout" ref={surface}>
         <div className="world-copy reveal">
           <SectionLabel num="03">КАРТА ИНТЕРЕСОВ</SectionLabel>
           <h2 id="world-title">
@@ -21,7 +26,7 @@ export function World({ name }: { name: string }) {
           <p className="section-intro">
             Семь направлений. Один центр притяжения.
             <br />
-            Выберите объект на орбите.
+            Выберите объект или листайте орбиты свайпом.
           </p>
           <div className="world-inspector" aria-live="polite">
             <div className="inspector-kicker mono">

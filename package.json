@@ -1,16 +1,17 @@
 {
   "name": "charon-identity",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "description": "Charon — интерактивная персональная цифровая идентичность.",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "playwright test",
+    "test": "npm run test:policy && playwright test",
     "typecheck": "tsc --noEmit",
-    "standalone": "node scripts/standalone.mjs"
+    "standalone": "node scripts/standalone.mjs",
+    "test:policy": "node --test checks/*.test.mjs"
   },
   "dependencies": {
     "lucide-react": "0.525.0",

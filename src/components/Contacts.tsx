@@ -1,7 +1,8 @@
+import { useEffect, useRef } from "react";
 import {
   ArrowUp,
   ArrowUpRight,
-  Plus,
+  Minus,
   Send,
   Mail,
   Github,
@@ -15,13 +16,7 @@ import {
   type ContactKey,
 } from "../config/profile";
 const icons = { telegram: Send, email: Mail, github: Github, social: Globe2 };
-export function Contacts({
-  profile,
-  onEdit,
-}: {
-  profile: Profile;
-  onEdit: () => void;
-}) {
+export function Contacts({ profile }: { profile: Profile }) {
   return (
     <section
       id="contacts"
@@ -57,7 +52,11 @@ export function Contacts({
                       : "Контакт не указан"}
                   </span>
                 </div>
-                {href ? <ArrowUpRight size={15} /> : <Plus size={15} />}
+                {href ? (
+                  <ArrowUpRight size={15} />
+                ) : (
+                  <Minus size={12} aria-hidden="true" />
+                )}
               </>
             );
             return href ? (
@@ -66,30 +65,43 @@ export function Contacts({
                 key={k}
                 href={href}
                 target={k === "email" ? undefined : "_blank"}
-                rel="noreferrer"
+                rel="noopener noreferrer"
               >
                 {inside}
               </a>
             ) : (
-              <button
-                className="contact-channel"
-                key={k}
-                onClick={onEdit}
-                aria-label={"Настроить контакт: " + contactNames[k]}
-              >
+              <div className="contact-channel unavailable" key={k}>
                 {inside}
-              </button>
+              </div>
             );
           })}
         </div>
         <div className="contact-note">
-          Контакты можно заполнить в настройках профиля.
+          {Object.values(profile.contacts).some(Boolean)
+            ? "Выберите удобный способ связи."
+            : "Владелец пока не указал способы связи."}
         </div>
       </div>
     </section>
   );
 }
-export function Footer() {
+export function Footer({ onOwner }: { onOwner: () => void }) {
+  const taps = useRef<number[]>([]);
+  useEffect(() => {
+    const clear = () => {
+      taps.current = [];
+    };
+    document.addEventListener("visibilitychange", clear);
+    return () => document.removeEventListener("visibilitychange", clear);
+  }, []);
+  const tap = () => {
+    const now = performance.now();
+    taps.current = [...taps.current.filter((t) => now - t < 3200), now];
+    if (taps.current.length >= 5) {
+      taps.current = [];
+      onOwner();
+    }
+  };
   return (
     <footer>
       <div className="shell footer-inner">
@@ -97,7 +109,14 @@ export function Footer() {
           <Mark />
           <span>CHARON</span>
         </a>
-        <span className="mono">PERSONAL DIGITAL IDENTITY</span>
+        <button
+          type="button"
+          className="mono owner-trigger"
+          onClick={tap}
+          aria-label="PERSONAL DIGITAL IDENTITY"
+        >
+          PERSONAL DIGITAL IDENTITY
+        </button>
         <a className="back-top" href="#home">
           Наверх
           <ArrowUp size={14} />

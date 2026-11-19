@@ -1,3 +1,4 @@
+import { useRailDrag } from "../hooks/gestures";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Plus } from "lucide-react";
 import { projects, type Project } from "../config/site";
@@ -59,9 +60,11 @@ function ProductArt({ project, index }: { project: Project; index: number }) {
 }
 export function ProjectModal({
   index,
+  onStep,
   onClose,
 }: {
   index: number;
+  onStep: (delta: number) => void;
   onClose: () => void;
 }) {
   const p = projects[index];
@@ -71,6 +74,8 @@ export function ProjectModal({
       eyebrow={`PROJECT DOSSIER / 0${index + 1}`}
       onClose={onClose}
       className="project-modal"
+      onStep={onStep}
+      page={{ index, total: projects.length }}
     >
       <ProductArt project={p} index={index} />
       <div className="dossier-meta">
@@ -95,6 +100,7 @@ export function ProjectModal({
 export function Projects({ onOpen }: { onOpen: (index: number) => void }) {
   const rail = useRef<HTMLDivElement>(null),
     [range, setRange] = useState({ first: 0, last: 1, end: false });
+  useRailDrag(rail);
   useEffect(() => {
     const el = rail.current!;
     let raf = 0;
@@ -182,7 +188,7 @@ export function Projects({ onOpen }: { onOpen: (index: number) => void }) {
           </div>
         </div>
         <div
-          className="project-rail reveal"
+          className="project-rail reveal drag-rail"
           ref={rail}
           role="region"
           aria-label="Горизонтальная галерея проектов"
@@ -225,6 +231,7 @@ export function Projects({ onOpen }: { onOpen: (index: number) => void }) {
           ))}
         </div>
         <div className="rail-bottom">
+          <span className="rail-gesture">← Листайте в сторону →</span>
           <div className="rail-track">
             <i
               style={{

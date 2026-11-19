@@ -1,0 +1,251 @@
+/* The footer keeps its original studio label; the tap target is comfortably larger than the type. */
+.footer-inner > .owner-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding-inline: 3px;
+  color: var(--soft);
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+.profile-seal {
+  color: #b0a4bc;
+  opacity: 0.8;
+}
+.contact-channel.unavailable {
+  cursor: default;
+}
+.contact-channel.unavailable:hover > svg {
+  color: var(--muted);
+}
+.owner-modal {
+  width: min(510px, calc(100% - 32px));
+}
+.owner-symbol {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  background: var(--accent-tint);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--accent);
+}
+.owner-modal .form-intro {
+  font-size: 12px;
+}
+.pin-form {
+  gap: 17px;
+}
+.pin-form input {
+  height: 45px;
+  font-family: var(--mono);
+  letter-spacing: 0.22em;
+  font-size: 18px;
+}
+.owner-modal .button:disabled {
+  opacity: 0.48;
+  cursor: default;
+}
+.owner-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 13px;
+  background: var(--accent-tint);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.owner-notice > svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.owner-session,
+.owner-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--soft);
+}
+.owner-review ol {
+  margin: 18px 0;
+  padding-left: 21px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.78;
+}
+.owner-review li + li {
+  margin-top: 7px;
+}
+.owner-review strong {
+  color: var(--text);
+  font-weight: 550;
+}
+.owner-review label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.owner-review textarea {
+  resize: vertical;
+  min-height: 60px;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  font: 10px/1.65 var(--mono);
+  padding: 9px;
+  overflow-wrap: anywhere;
+}
+.owner-expiry {
+  color: var(--soft);
+  font-size: 8px;
+  margin: 8px 0 17px;
+}
+.owner-back {
+  margin-top: 18px;
+}
+.owner-error {
+  margin: 12px 0 0;
+}
+.owner-modal .form-actions {
+  flex-wrap: wrap;
+}
+.owner-modal .form-actions .button {
+  gap: 9px;
+}
+[data-swipe="true"] {
+  touch-action: pan-y pinch-zoom;
+}
+.drag-rail {
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+.project-rail {
+  cursor: grab;
+}
+.drag-rail img,
+[data-swipe] img {
+  -webkit-user-drag: none;
+}
+.drag-rail[data-dragging="true"] {
+  scroll-snap-type: none !important;
+  scroll-behavior: auto !important;
+}
+.drag-rail[data-dragging="true"],
+.drag-rail[data-dragging="true"] *,
+[data-swipe][data-dragging="true"],
+[data-swipe][data-dragging="true"] * {
+  cursor: grabbing !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+.project-rail[data-dragging="true"] .project-card {
+  transform: none;
+}
+.rail-gesture,
+.slide-footer > span {
+  font-size: 10px;
+  color: var(--soft);
+}
+.slide-footer {
+  border-top: 1px solid var(--line);
+  margin-top: 21px;
+  padding-top: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.slide-footer > span,
+.slide-footer > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.slide-footer .mono {
+  font-size: 9px;
+  color: var(--soft);
+}
+.slide-footer .plain-icon {
+  width: 32px;
+  height: 32px;
+}
+.project-modal .product-art,
+.interest-modal .study-art,
+.field-note p,
+.inspector-content {
+  position: relative;
+  left: var(--swipe-offset, 0px);
+}
+.modal[data-swipe="true"] .product-art,
+.modal[data-swipe="true"] .study-art,
+.field-note {
+  cursor: grab;
+}
+@media (max-width: 720px) {
+  .footer-inner > .owner-trigger {
+    font-size: 6.5px;
+    letter-spacing: 0.09em;
+  }
+  .interest-wall {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 3px;
+    cursor: grab;
+  }
+  .interest-wall .interest-card {
+    flex: 0 0 84%;
+    scroll-snap-align: start;
+    min-height: 0;
+    height: 200px;
+  }
+  .interest-wall .interest-card h3,
+  .interest-wall .interest-card:first-child h3 {
+    font-size: 20px;
+  }
+  .interest-wall .interest-card:first-child > div {
+    max-width: none;
+  }
+  .interest-wall .interest-card.big > .generative-art,
+  .interest-wall .interest-card:first-child > .generative-art {
+    width: 90%;
+    height: 64%;
+    top: 2px;
+    right: -4%;
+  }
+  .interest-wall .interest-card.small .interest-glyph {
+    margin: 14px 0;
+  }
+  .interest-wall .interest-card.small .interest-glyph svg {
+    height: 40px;
+    width: 40px;
+  }
+  .rail-gesture {
+    font-size: 9px;
+  }
+  .rail-bottom {
+    gap: 10px;
+  }
+  .owner-modal .form-actions .button {
+    min-height: 40px;
+  }
+  .slide-footer > span {
+    font-size: 9px;
+  }
+}

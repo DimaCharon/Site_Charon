@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+const publicIdentity = JSON.parse(readFileSync("public/identity.json", "utf8"));
 import { test as base, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 const test = base.extend<{ cleanPage: void }>({
@@ -122,52 +124,41 @@ test("Профиль, интерактивные направления, сем�
     await page.getByRole("button", { name: "Закрыть окно" }).click();
   }
 });
-test("Настройки сохраняются локально; контакты не выдуманы и корректно валидируются", async ({
+test("Посетитель видит только опубликованный профиль, а личные настройки сохраняются", async ({
   page,
 }) => {
   await posterMode(page);
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "charon.profile.v2",
+      JSON.stringify({
+        name: "Legacy preview",
+        contacts: {
+          telegram: "",
+          email: "preview@example.org",
+          github: "",
+          social: "",
+        },
+      }),
+    ),
+  );
   await page.goto("/");
-  await expect(page.locator("a.contact-channel")).toHaveCount(0);
+  await expect(page.locator(".id-name")).toHaveText(publicIdentity.name);
+  await expect(page.locator(".contact-channels button")).toHaveCount(0);
+  await expect(page.locator(".identity-card button")).toHaveCount(0);
   await page
     .getByRole("button", { name: "Настройки пространства", exact: true })
     .click();
-  await page.getByRole("button", { name: "Серебро", exact: true }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.getByRole("switch", { name: "Интерактивный курсор" }).click();
-  await page
-    .getByRole("button", { name: "Профиль и контакты", exact: true })
-    .click();
-  await page.getByLabel("Имя или псевдоним").fill("Preview identity");
-  await page
-    .getByLabel("Telegram", { exact: true })
-    .fill("https://example.org/test");
-  await page.getByRole("button", { name: "Сохранить", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Проверьте ссылку");
-  await page.getByLabel("Telegram", { exact: true }).fill("");
-  await page.getByLabel("Email", { exact: true }).fill("preview@example.org");
-  await page.getByRole("button", { name: "Сохранить", exact: true }).click();
+  await expect(page.locator("dialog input")).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: "Сохранено", exact: true }),
-  ).toBeVisible();
-  const wait = page.waitForEvent("download");
-  await page.getByRole("button", { name: "JSON", exact: true }).click();
-  expect((await wait).suggestedFilename()).toBe("identity.json");
+    page.getByRole("button", { name: "Профиль и контакты", exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Серебро", exact: true }).click();
+  await page.getByRole("switch", { name: "Интерактивный курсор" }).click();
   await page.keyboard.press("Escape");
   await page.reload();
-  await expect(page.locator(".id-name")).toHaveText("Preview identity");
-  await expect(page.locator(".hero-author")).toHaveText("Preview identity");
-  await expect(page.locator("a.contact-channel")).toHaveAttribute(
-    "href",
-    "mailto:preview@example.org",
-  );
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page
-    .getByRole("button", { name: "Редактировать профиль", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Вернуть опубликованный профиль" })
-    .click();
-  await expect(page.locator(".id-name")).toHaveText("Charon");
+  await expect(page.locator(".id-name")).toHaveText(publicIdentity.name);
 });
 test("Мобильное меню, компоновка 320–1920 px, отсутствие горизонтального переполнения", async ({
   page,
@@ -228,4 +219,156 @@ test("Без WebGL, reduced motion и доступность в обеих те�
       })),
     ).toEqual([]);
   }
+});
+
+async function drag(
+  page: import("@playwright/test").Page,
+  selector: string,
+  dx: number,
+) {
+  const node = page.locator(selector).first();
+  await node.scrollIntoViewIfNeeded();
+  const box = (await node.boundingBox())!;
+  const x = box.x + box.width * (dx < 0 ? 0.74 : 0.26),
+    y = box.y + box.height * 0.55;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + dx, y + 2, { steps: 12 });
+  await page.mouse.up();
+}
+test("Пять нажатий, пароль и изолированный черновик владельца", async ({
+  page,
+}) => {
+  await posterMode(page);
+  await page.goto("/");
+  const trigger = page.locator("footer .owner-trigger");
+  await trigger.scrollIntoViewIfNeeded();
+  for (let i = 0; i < 4; i++) await trigger.click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await trigger.click();
+  const pin = page.getByLabel("Код доступа", { exact: true });
+  await expect(pin).toBeVisible();
+  await pin.fill("incorrect");
+  await page.getByRole("button", { name: "Войти", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Неверный код");
+  await expect(page.getByLabel("Имя или псевдоним")).toHaveCount(0);
+  if (!process.env.CHARON_TEST_PIN) return;
+  await pin.fill(process.env.CHARON_TEST_PIN);
+  await page.getByRole("button", { name: "Войти", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Панель владельца" }),
+  ).toBeVisible();
+  await page.getByLabel("Имя или псевдоним").fill("Preview identity");
+  await page
+    .getByLabel("Telegram", { exact: true })
+    .fill("https://example.org/preview");
+  await page.getByRole("button", { name: "Подготовить публикацию" }).click();
+  await expect(page.getByRole("alert")).toContainText("Проверьте ссылку");
+  await page.getByLabel("Telegram", { exact: true }).fill("");
+  await page.getByLabel("Email", { exact: true }).fill("preview@example.org");
+  await page.getByRole("button", { name: "Подготовить публикацию" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Подтверждение публикации" }),
+  ).toBeVisible();
+  const packet = await page
+    .getByLabel("Пакет изменений", { exact: true })
+    .inputValue();
+  expect(packet).toMatch(/^CH1\./);
+  const body = JSON.parse(
+    Buffer.from(packet.split(".")[1], "base64url").toString(),
+  );
+  expect(body.profile.name).toBe("Preview identity");
+  expect(body.profile.contacts.email).toBe("preview@example.org");
+  await expect(
+    page.getByRole("link", { name: "Открыть GitHub" }),
+  ).toHaveAttribute("href", /actions\/workflows\/owner-profile\.yml$/);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".id-name")).toHaveText(publicIdentity.name);
+  await page.reload();
+  await expect(page.locator(".id-name")).toHaveText(publicIdentity.name);
+  await expect(page.locator("a.contact-channel")).toHaveCount(
+    Object.values(publicIdentity.contacts).filter(Boolean).length,
+  );
+});
+test("Мышью листаются галерея, досье, направления, орбиты и заметки", async ({
+  page,
+}) => {
+  await posterMode(page);
+  await page.goto("/");
+  await drag(page, ".project-rail", -190);
+  await expect
+    .poll(() => page.locator(".project-rail").evaluate((el) => el.scrollLeft))
+    .toBeGreaterThan(100);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page
+    .getByRole("button", {
+      name: "Подробнее о проекте Charon Trading",
+      exact: true,
+    })
+    .click();
+  await drag(page, "dialog .product-art", -120);
+  await expect(page.locator("dialog .modal-title")).toHaveText("AI-агенты");
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.locator("dialog .modal-title")).toHaveText(
+    "Charon Trading",
+  );
+  await page.keyboard.press("Escape");
+  await drag(page, ".field-note", -115);
+  await expect(
+    page.getByRole("tab", { name: "Digital Products" }),
+  ).toHaveAttribute("aria-selected", "true");
+  await drag(page, ".atlas-stage", -115);
+  await expect(page.locator(".inspector-kicker")).toContainText("02");
+  await page.locator(".interest-card").first().click();
+  await drag(page, "dialog .study-art", -120);
+  await expect(page.locator("dialog .modal-title")).toHaveText("Programming");
+  await page.keyboard.press("Escape");
+});
+test("На сенсорном экране работают настоящие горизонтальные свайпы", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    hasTouch: true,
+    isMobile: true,
+    reducedMotion: "reduce",
+  });
+  const page = await context.newPage();
+  await page.goto("http://127.0.0.1:4173/");
+  const cdp = await context.newCDPSession(page);
+  const swipe = async (sel: string) => {
+    const el = page.locator(sel).first();
+    await el.scrollIntoViewIfNeeded();
+    const r = (await el.boundingBox())!;
+    const x = r.x + r.width * 0.8,
+      y = r.y + r.height * 0.5;
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x, y }],
+    });
+    for (let i = 1; i <= 9; i++)
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: x - i * r.width * 0.058, y }],
+      });
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+  };
+  await swipe(".project-rail");
+  await expect
+    .poll(() => page.locator(".project-rail").evaluate((e) => e.scrollLeft))
+    .toBeGreaterThan(100);
+  await swipe(".interest-wall");
+  await expect
+    .poll(() => page.locator(".interest-wall").evaluate((e) => e.scrollLeft))
+    .toBeGreaterThan(80);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.locator(".interest-card").nth(1).tap();
+  await swipe("dialog .study-art");
+  await expect(page.locator("dialog .modal-title")).toHaveText(
+    "Crypto Analytics",
+  );
+  await context.close();
 });

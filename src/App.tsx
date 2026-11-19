@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { About } from "./components/About";
@@ -8,14 +8,17 @@ import { Interests, InterestModal } from "./components/Interests";
 import { Contacts, Footer } from "./components/Contacts";
 import { Effects } from "./components/Effects";
 import { Settings } from "./components/Settings";
-import { usePreferences, useProfile } from "./config/profile";
+import { usePreferences, publishedProfile } from "./config/profile";
 import "./styles/global.css";
 import "./styles/sections.css";
 import "./styles/responsive.css";
+import { projects, interests } from "./config/site";
+const OwnerPanel = lazy(() => import("./owner/OwnerPanel"));
 export default function App() {
-  const { prefs, setPrefs, reduced, systemReduce } = usePreferences(),
-    { profile, save, reset } = useProfile();
-  const [settings, setSettings] = useState<"ui" | "profile" | null>(null),
+  const { prefs, setPrefs, reduced, systemReduce } = usePreferences();
+  const profile = publishedProfile;
+  const [settings, setSettings] = useState(false),
+    [owner, setOwner] = useState(false),
     [project, setProject] = useState<number | null>(null),
     [interest, setInterest] = useState<number | null>(null);
   return (
@@ -23,40 +26,58 @@ export default function App() {
       <a href="#main" className="skip-link">
         Перейти к содержанию
       </a>
-      <Header onSettings={() => setSettings("ui")} />
+      <Header onSettings={() => setSettings(true)} />
       <main id="main">
         <Hero
           name={profile.name}
           reduced={reduced}
-          overlay={settings !== null || project !== null || interest !== null}
+          overlay={owner || settings || project !== null || interest !== null}
         />
-        <About name={profile.name} onEdit={() => setSettings("profile")} />
+        <About name={profile.name} />
         <Projects onOpen={setProject} />
         <World name={profile.name} />
         <Interests onOpen={setInterest} />
-        <Contacts profile={profile} onEdit={() => setSettings("profile")} />
+        <Contacts profile={profile} />
       </main>
-      <Footer />
+      <Footer onOwner={() => setOwner(true)} />
       <Effects cursor={prefs.cursor} reduced={reduced} />
       {settings && (
         <Settings
-          key={settings}
-          initialTab={settings}
-          profile={profile}
           prefs={prefs}
           setPrefs={setPrefs}
-          save={save}
-          reset={reset}
           systemReduce={systemReduce}
-          onClose={() => setSettings(null)}
+          onClose={() => setSettings(false)}
         />
       )}{" "}
+      {owner && (
+        <Suspense fallback={null}>
+          <OwnerPanel profile={profile} onClose={() => setOwner(false)} />
+        </Suspense>
+      )}
       {project !== null && (
-        <ProjectModal index={project} onClose={() => setProject(null)} />
+        <ProjectModal
+          index={project}
+          onStep={(d) =>
+            setProject(
+              (i) => ((i ?? 0) + d + projects.length) % projects.length,
+            )
+          }
+          onClose={() => setProject(null)}
+        />
       )}{" "}
       {interest !== null && (
-        <InterestModal index={interest} onClose={() => setInterest(null)} />
+        <InterestModal
+          index={interest}
+          onStep={(d) =>
+            setInterest(
+              (i) => ((i ?? 0) + d + interests.length) % interests.length,
+            )
+          }
+          onClose={() => setInterest(null)}
+        />
       )}
     </>
   );
 }
+
+import "./styles/owner-and-gestures.css";

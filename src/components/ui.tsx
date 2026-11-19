@@ -1,6 +1,10 @@
+import { usePagingGesture } from "../hooks/gestures";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import {
   X,
+  ArrowLeft,
+  ArrowRight,
+  MoveHorizontal,
   Cpu,
   Braces,
   Activity,
@@ -88,15 +92,23 @@ export function Modal({
   onClose,
   className = "",
   eyebrow,
+  onStep,
+  page,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   className?: string;
   eyebrow?: string;
+  onStep?: (delta: number) => void;
+  page?: { index: number; total: number };
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const id = useId();
+  usePagingGesture(ref, onStep);
+  useEffect(() => {
+    if (page && ref.current) ref.current.scrollTop = 0;
+  }, [page?.index]);
   useEffect(() => {
     const dialog = ref.current!;
     const previous = document.activeElement as HTMLElement | null;
@@ -146,6 +158,34 @@ export function Modal({
         {title}
       </h2>
       {children}
+      {page && onStep && (
+        <div className="slide-footer">
+          <span>
+            <MoveHorizontal size={14} />
+            Листайте в сторону
+          </span>
+          <div>
+            <button
+              aria-label="Предыдущий слайд"
+              className="plain-icon"
+              onClick={() => onStep(-1)}
+            >
+              <ArrowLeft size={14} />
+            </button>
+            <span className="mono" role="status">
+              {String(page.index + 1).padStart(2, "0")} /{" "}
+              {String(page.total).padStart(2, "0")}
+            </span>
+            <button
+              aria-label="Следующий слайд"
+              className="plain-icon"
+              onClick={() => onStep(1)}
+            >
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
     </dialog>
   );
 }

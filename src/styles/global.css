@@ -968,26 +968,6 @@ input:focus-visible,
   color: var(--soft);
   font-size: 8px;
 }
-.settings-tabs {
-  display: flex;
-  border: 1px solid var(--line);
-  background: var(--bg);
-  border-radius: 6px;
-  padding: 4px;
-  gap: 3px;
-  margin: 0 0 23px;
-}
-.settings-tabs button {
-  flex: 1;
-  padding: 7px 9px;
-  font-size: 12px;
-  color: var(--muted);
-  border-radius: 3px;
-}
-.settings-tabs button.active {
-  background: var(--panel-raised);
-  color: var(--text);
-}
 .setting-head h3,
 .setting-row h3 {
   font-size: 14px;

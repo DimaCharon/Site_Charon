@@ -1,8 +1,12 @@
+import { useRef } from "react";
+import { useRailDrag } from "../hooks/gestures";
 import { ArrowUpRight } from "lucide-react";
 import { interests } from "../config/site";
 import { SectionLabel, Glyph, Modal } from "./ui";
 import { GenerativeArt } from "./Art";
 export function Interests({ onOpen }: { onOpen: (i: number) => void }) {
+  const rail = useRef<HTMLDivElement>(null);
+  useRailDrag(rail);
   return (
     <section
       id="interests"
@@ -16,7 +20,7 @@ export function Interests({ onOpen }: { onOpen: (i: number) => void }) {
         </h2>
         <span className="section-side-note mono">RESEARCH FIELDS / 07</span>
       </div>
-      <div className="interest-wall">
+      <div ref={rail} className="interest-wall drag-rail">
         {interests.map((item, i) => (
           <button
             key={item.kind}
@@ -46,9 +50,11 @@ export function Interests({ onOpen }: { onOpen: (i: number) => void }) {
 }
 export function InterestModal({
   index,
+  onStep,
   onClose,
 }: {
   index: number;
+  onStep: (delta: number) => void;
   onClose: () => void;
 }) {
   const f = interests[index];
@@ -58,6 +64,8 @@ export function InterestModal({
       eyebrow={`FIELD NOTES / 0${index + 1}`}
       onClose={onClose}
       className="interest-modal"
+      onStep={onStep}
+      page={{ index, total: interests.length }}
     >
       <div className="study-art">
         <GenerativeArt kind={f.kind} />
