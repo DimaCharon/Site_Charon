@@ -1,12 +1,18 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { existsSync, readFileSync } from "node:fs";
-import { normalizeProfile } from "./shared/profile-schema.mjs";
+import { existsSync } from "node:fs";
+import { loadPublished } from "./scripts/published-data.mjs";
+import { publishMetadata } from "./shared/metadata.mjs";
+const { content, profile } = loadPublished();
 const rules =
   "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'";
 export default defineConfig({
   plugins: [
     react(),
+    {
+      name: "charon-content-metadata",
+      transformIndexHtml: (html) => publishMetadata(html, content.copy),
+    },
     {
       name: "charon-static-policy",
       apply: "build",
@@ -23,12 +29,10 @@ export default defineConfig({
   ],
   base: "./",
   define: {
+    __CHARON_CONTENT__: JSON.stringify(content),
+    __CHARON_MEDIA__: JSON.stringify({}),
     __HAS_MASCOT__: JSON.stringify(existsSync("public/models/charon.glb")),
-    __CHARON_PROFILE__: JSON.stringify(
-      normalizeProfile(
-        JSON.parse(readFileSync("public/identity.json", "utf8")),
-      ),
-    ),
+    __CHARON_PROFILE__: JSON.stringify(profile),
   },
   server: {
     host: "0.0.0.0",

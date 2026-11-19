@@ -1,7 +1,7 @@
 {
   "name": "charon-identity",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.2.0",
   "type": "module",
   "description": "Charon — интерактивная персональная цифровая идентичность.",
   "scripts": {
@@ -26,6 +26,7 @@
     "@types/react-dom": "^19.1.0",
     "@types/three": "0.180.0",
     "@vitejs/plugin-react": "^4.6.0",
+    "jpeg-js": "0.4.4",
     "typescript": "^5.8.3",
     "vite": "^6.4.0"
   },

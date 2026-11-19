@@ -7,6 +7,29 @@ import {
   canonicalProfile,
   normalizeProfile,
 } from "../shared/profile-schema.mjs";
+import { canonicalDocument } from "../shared/content-schema.mjs";
+import {
+  patchedDocument,
+  INLINE_LIMIT,
+  PACKET_LIMIT,
+  LIFETIME,
+} from "../shared/edition.mjs";
+import { fromDraft } from "./release-inbox.mjs";
+import { planMedia, applyMedia } from "./media-store.mjs";
+import { join } from "node:path";
+function authorize({ owner, actor, initiator, ref, event }) {
+  if (
+    !owner ||
+    !actor ||
+    !initiator ||
+    actor.toLowerCase() !== owner.toLowerCase() ||
+    initiator.toLowerCase() !== owner.toLowerCase() ||
+    ref !== "refs/heads/main" ||
+    event !== "workflow_dispatch"
+  )
+    throw new Error("Подтверждение владельца для main обязательно.");
+}
+// Legacy standalone editions may still submit profile-only CH1 packets.
 export function verifyRequest({
   packet,
   key,
@@ -19,16 +42,7 @@ export function verifyRequest({
   event,
   now = Date.now(),
 }) {
-  if (
-    !owner ||
-    !actor ||
-    !initiator ||
-    actor.toLowerCase() !== owner.toLowerCase() ||
-    initiator.toLowerCase() !== owner.toLowerCase() ||
-    ref !== "refs/heads/main" ||
-    event !== "workflow_dispatch"
-  )
-    throw new Error("Подтверждение владельца для main обязательно.");
+  authorize({ owner, actor, initiator, ref, event });
   if (typeof key !== "string" || !/^[a-f\d]{64}$/.test(key))
     throw new Error("Ключ публикации не настроен.");
   if (typeof packet !== "string" || packet.length > 8192)
@@ -69,34 +83,111 @@ export function verifyRequest({
     );
   return normalizeProfile(payload.profile);
 }
+export function verifyEdition(request) {
+  const { packet, key, current, repository, now = Date.now() } = request;
+  authorize(request);
+  if (typeof key !== "string" || !/^[a-f0-9]{64}$/.test(key))
+    throw new Error("Ключ публикации не настроен.");
+  if (typeof packet !== "string" || packet.length > PACKET_LIMIT)
+    throw new Error("Некорректный размер пакета.");
+  const m = /^CH2\.([A-Za-z0-9_-]+)\.([a-f0-9]{64})$/.exec(packet);
+  if (!m) throw new Error("Некорректный пакет из редактора.");
+  const sig = createHmac("sha256", Buffer.from(key, "hex"))
+    .update("CH2." + m[1])
+    .digest();
+  if (!timingSafeEqual(sig, Buffer.from(m[2], "hex")))
+    throw new Error("Подпись не подтверждена.");
+  const data = JSON.parse(Buffer.from(m[1], "base64url").toString("utf8"));
+  if (
+    !data ||
+    typeof data !== "object" ||
+    Object.keys(data).sort().join(",") !== "base,issued,patch,repo,v" ||
+    data.v !== 2 ||
+    data.repo !== repository ||
+    !Number.isSafeInteger(data.issued) ||
+    data.issued > now + 60_000 ||
+    now - data.issued > LIFETIME
+  )
+    throw new Error("Неверный адресат или истёк срок действия пакета.");
+  if (
+    data.base !==
+    createHash("sha256").update(canonicalDocument(current)).digest("hex")
+  )
+    throw new Error(
+      "Опубликованный сайт уже изменился. Обновите страницу и перенесите правки.",
+    );
+  return patchedDocument(current, data.patch);
+}
+export async function applyEdition({
+  current,
+  packet,
+  images = {},
+  request,
+  root = "public",
+  checkOnly,
+}) {
+  const document = packet.startsWith("CH1.")
+    ? {
+        ...current,
+        profile: verifyRequest({
+          ...request,
+          packet,
+          current: current.profile,
+        }),
+      }
+    : verifyEdition({ ...request, packet, current });
+  const plan = await planMedia(join(root, "media"), current, document, images);
+  const changed =
+    !checkOnly && canonicalDocument(current) !== canonicalDocument(document);
+  if (changed) {
+    await applyMedia(join(root, "media"), plan);
+    for (const [name, value] of [
+      ["identity", document.profile],
+      ["content", document.content],
+    ])
+      await writeFile(
+        join(root, name + ".json"),
+        JSON.stringify(value, null, 2) + "\n",
+      );
+  }
+  return { changed, document };
+}
 async function apply() {
   const e = process.env;
   if (e.GITHUB_ACTIONS !== "true")
     throw new Error("Публикация выполняется только в GitHub Actions.");
-  const current = JSON.parse(await readFile("public/identity.json", "utf8"));
-  const profile = verifyRequest({
-    packet: e.PROFILE_PACKET,
+  const request = {
     key: e.PROFILE_SIGNING_KEY,
-    current,
     owner: e.GITHUB_REPOSITORY_OWNER,
     actor: e.GITHUB_ACTOR,
     initiator: e.GITHUB_TRIGGERING_ACTOR,
     repository: e.GITHUB_REPOSITORY,
     ref: e.GITHUB_REF,
     event: e.GITHUB_EVENT_NAME,
-  });
-  const changed =
-    e.CHECK_ONLY !== "true" &&
-    canonicalProfile(profile) !== canonicalProfile(current);
-  if (changed)
-    await writeFile(
-      "public/identity.json",
-      JSON.stringify(profile, null, 2) + "\n",
+  };
+  authorize(request);
+  const input = (e.PROFILE_PACKET || "").trim();
+  if (!input || input.length > INLINE_LIMIT)
+    throw new Error(
+      "Вставьте короткий пакет или имя файла из черновика релиза.",
     );
+  const bundle = input.startsWith("charon-")
+    ? await fromDraft(input, request.repository, e.GH_TOKEN)
+    : { packet: input, images: {} };
+  const current = {
+    profile: JSON.parse(await readFile("public/identity.json", "utf8")),
+    content: JSON.parse(await readFile("public/content.json", "utf8")),
+  };
+  const { changed } = await applyEdition({
+    current,
+    ...bundle,
+    request,
+    checkOnly: e.CHECK_ONLY === "true",
+  });
   await appendFile(e.GITHUB_OUTPUT, `changed=${changed}\n`);
   console.log(
     changed
-      ? "Проверенный профиль подготовлен к публикации."
+      ? "Проверенные материалы подготовлены к публикации."
       : "Проверка пройдена. Файлы не изменены.",
   );
 }

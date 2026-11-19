@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import { useEffect, useRef, useState } from "react";
 import {
   Box,
@@ -119,22 +120,22 @@ export function Viewport({
       <div className="viewport-top mono">
         <span className="object-label">
           <span className="target-dot" />
-          OBJECT — 001
+          {copy["studio.text01"]}
         </span>
         <span className="render-status">
           <i />
           {!activated
-            ? "STUDIO VIEW"
+            ? copy["studio.text02"]
             : status === "poster"
-              ? "STUDIO STILL"
+              ? copy["studio.text03"]
               : status === "ready"
-                ? "LIVE RENDER"
-                : "PREVIEW"}
+                ? copy["studio.text04"]
+                : copy["studio.text05"]}
         </span>
       </div>
       <div className="object-caption mono" aria-hidden="true">
-        {mascot ? "MASCOT" : "ALLOY"}
-        <span> / 01</span>
+        {mascot ? copy["studio.text06"] : copy["studio.text07"]}
+        <span> {copy["studio.objectIndex"]}</span>
         <i />
       </div>
       <img
@@ -142,7 +143,7 @@ export function Viewport({
         src={`${import.meta.env.BASE_URL}art/identity.webp`}
         width="900"
         height="680"
-        alt="Скульптурный серебристый знак Charon"
+        alt={copy["studio.text08"]}
         fetchPriority="high"
       />
       <div
@@ -153,11 +154,7 @@ export function Viewport({
         onClick={() => {
           if (!activated) setActivated(true);
         }}
-        aria-label={
-          activated
-            ? "Интерактивный объект Charon. Перетаскивайте или вращайте стрелками клавиатуры. Пробел — пауза."
-            : "Активировать интерактивный объект Charon"
-        }
+        aria-label={activated ? copy["studio.text09"] : copy["studio.text10"]}
         onKeyDown={(e) => {
           const k = e.key;
           if (!activated && (k === "Enter" || k === " ")) {
@@ -182,16 +179,16 @@ export function Viewport({
         {!activated ? (
           <button className="activate-3d" onClick={() => setActivated(true)}>
             <Box size={13} />
-            Включить 3D
+            {copy["studio.text11"]}
           </button>
         ) : (
           <div className="rotate-hint">
             <Rotate3D size={16} strokeWidth={1.4} />
             {status === "poster"
-              ? "Студийный рендер"
+              ? copy["studio.text12"]
               : status === "loading"
-                ? "Подготовка сцены…"
-                : "Вращайте объект"}
+                ? copy["studio.text13"]
+                : copy["studio.text14"]}
           </div>
         )}
         <div className="viewport-tools">
@@ -200,8 +197,10 @@ export function Viewport({
               <button
                 className={"scene-button " + (wire ? "selected" : "")}
                 onClick={() => setWire((v) => !v)}
-                aria-label={wire ? "Показать материал" : "Показать каркас"}
-                title={wire ? "Материал" : "Каркас"}
+                aria-label={
+                  wire ? copy["studio.text15"] : copy["studio.text16"]
+                }
+                title={wire ? copy["studio.text17"] : copy["studio.text18"]}
                 aria-pressed={wire}
               >
                 {wire ? <Scan size={14} /> : <Box size={14} />}
@@ -209,11 +208,11 @@ export function Viewport({
               <button
                 className="scene-button motion-control"
                 aria-label={
-                  paused ? "Включить движение" : "Приостановить движение"
+                  paused ? copy["studio.text19"] : copy["studio.text20"]
                 }
                 aria-pressed={paused}
                 onClick={() => setPaused((v) => !v)}
-                title={paused ? "Включить движение" : "Пауза"}
+                title={paused ? copy["studio.text19"] : copy["studio.text21"]}
               >
                 {paused ? <Play size={13} /> : <Pause size={13} />}
               </button>
@@ -224,8 +223,8 @@ export function Viewport({
               {status === "ready" && (
                 <button
                   className="scene-button"
-                  title="Исходный ракурс"
-                  aria-label="Исходный ракурс"
+                  title={copy["studio.text22"]}
+                  aria-label={copy["studio.text22"]}
                   onClick={() => api.current?.reset()}
                 >
                   <RotateCcw size={14} />
@@ -233,8 +232,8 @@ export function Viewport({
               )}
               <button
                 className="scene-button"
-                title="Сохранить изображение"
-                aria-label="Сохранить изображение"
+                title={copy["studio.text23"]}
+                aria-label={copy["studio.text23"]}
                 onClick={download}
               >
                 <Download size={14} />
@@ -243,9 +242,9 @@ export function Viewport({
           ) : (
             <button
               className="scene-button"
-              aria-label="Развернуть 3D-сцену"
+              aria-label={copy["studio.text24"]}
               onClick={onExpand}
-              title="Развернуть сцену"
+              title={copy["studio.text25"]}
             >
               <Maximize2 size={14} />
             </button>
@@ -266,18 +265,14 @@ export function StudioModal({
     <Modal
       onClose={onClose}
       className="studio-modal"
-      title="Объект Charon"
-      eyebrow="OBJECT VIEWER / 001"
+      title={copy["studio.text26"]}
+      eyebrow={copy["studio.text27"]}
     >
       <Viewport expanded reduced={reduced} />
       <div className="studio-foot">
         <Crosshair size={16} />
-        <p>
-          {__HAS_MASCOT__
-            ? "Оригинальная GLB-модель в студийном освещении."
-            : "Фирменный знак из серии Identity Objects. Место для оригинальной GLB-модели маскота готово."}
-        </p>
-        <span className="mono">CH—01</span>
+        <p>{__HAS_MASCOT__ ? copy["studio.text28"] : copy["studio.text29"]}</p>
+        <span className="mono">{copy["studio.text30"]}</span>
       </div>
     </Modal>
   );

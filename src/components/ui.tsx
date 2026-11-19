@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import { usePagingGesture } from "../hooks/gestures";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import {
@@ -144,11 +145,11 @@ export function Modal({
       }}
     >
       <div className="modal-top">
-        <span className="mono">{eyebrow || "CHARON / IDENTITY SYSTEM"}</span>
+        <span className="mono">{eyebrow || copy["interface.text01"]}</span>
         <button
           autoFocus
           className="icon-button"
-          aria-label="Закрыть окно"
+          aria-label={copy["interface.text02"]}
           onClick={onClose}
         >
           <X size={17} />
@@ -162,11 +163,11 @@ export function Modal({
         <div className="slide-footer">
           <span>
             <MoveHorizontal size={14} />
-            Листайте в сторону
+            {copy["interface.swipe"]}
           </span>
           <div>
             <button
-              aria-label="Предыдущий слайд"
+              aria-label={copy["interface.text03"]}
               className="plain-icon"
               onClick={() => onStep(-1)}
             >
@@ -177,7 +178,7 @@ export function Modal({
               {String(page.total).padStart(2, "0")}
             </span>
             <button
-              aria-label="Следующий слайд"
+              aria-label={copy["interface.text04"]}
               className="plain-icon"
               onClick={() => onStep(1)}
             >

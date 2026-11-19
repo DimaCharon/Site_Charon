@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Art } from "../config/site";
 const TAU = Math.PI * 2;
@@ -231,7 +232,7 @@ export function GenerativeArt({
           src={`${import.meta.env.BASE_URL}art/identity.webp`}
           width="900"
           height="680"
-          alt="Серебристый объект Charon"
+          alt={copy["studio.text31"]}
           loading="lazy"
         />
       </div>

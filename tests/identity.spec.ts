@@ -1,5 +1,16 @@
 import { readFileSync } from "node:fs";
 const publicIdentity = JSON.parse(readFileSync("public/identity.json", "utf8"));
+import type { Content } from "../shared/content-schema.mjs";
+const editorial: Content = JSON.parse(
+  readFileSync("public/content.json", "utf8"),
+);
+const {
+  copy: words,
+  projects: archive,
+  directions: dirs,
+  interests: notes,
+  worlds: orbits,
+} = editorial;
 import { test as base, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 const test = base.extend<{ cleanPage: void }>({
@@ -45,52 +56,67 @@ test("Настоящая 3D-сцена: каркас, вращение, прос
   await page.waitForTimeout(180);
   expect((await scene.screenshot()).equals(initial)).toBe(false);
   await page
-    .getByRole("button", { name: "Показать каркас", exact: true })
+    .getByRole("button", { name: words["studio.text16"], exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Показать материал" }),
+    page.getByRole("button", { name: words["studio.text15"] }),
   ).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "Развернуть 3D-сцену" }).click();
+  await page.getByRole("button", { name: words["studio.text24"] }).click();
   const d = page.getByRole("dialog");
   await expect(d.locator(".viewport")).toHaveAttribute("data-state", "ready");
   const wait = page.waitForEvent("download");
-  await d.getByRole("button", { name: "Сохранить изображение" }).click();
+  await d.getByRole("button", { name: words["studio.text23"] }).click();
   expect((await wait).suggestedFilename()).toBe("charon-artifact.png");
   await page.keyboard.press("Escape");
   await expect(d).toHaveCount(0);
 });
-test("Проектный архив: все семь досье, честные статусы, горизонтальная навигация", async ({
+test("Проектный архив: опубликованные досье, честные статусы, горизонтальная навигация", async ({
   page,
 }) => {
   await posterMode(page);
   await page.goto("/");
-  await page.getByRole("link", { name: "Мои проекты", exact: true }).click();
+  await page
+    .getByRole("link", { name: words["hero.primary"], exact: true })
+    .click();
   await expect(page).toHaveURL(/#projects$/);
   const cards = page.locator(".project-card");
-  await expect(cards).toHaveCount(7);
+  test.setTimeout(45_000 + archive.length * 2600);
+  await expect(cards).toHaveCount(archive.length);
+  if (!archive.length) {
+    await expect(page.locator(".empty-projects")).toHaveText(
+      words["projects.empty"],
+    );
+    return;
+  }
   await expect(
-    page.getByRole("button", { name: "Предыдущий проект", exact: true }),
+    page.getByRole("button", { name: words["projects.text07"], exact: true }),
   ).toBeDisabled();
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < archive.length; i++) {
     const name = await cards.nth(i).locator("h3").innerText();
     await cards.nth(i).getByRole("button").click();
     await expect(
       page.getByRole("dialog").getByRole("heading", { name, exact: true }),
     ).toBeVisible();
-    if (i === 1)
-      await expect(page.locator("dialog .project-status")).toHaveText(
-        "Концепция",
-      );
+    await expect(page.locator("dialog .project-status")).toHaveText(
+      words[
+        archive[i].status === "Концепция"
+          ? "projects.concept"
+          : archive[i].status === "Разработка"
+            ? "projects.working"
+            : "projects.active"
+      ],
+    );
     await page.keyboard.press("Escape");
   }
   await expect(
-    page.getByRole("button", { name: "Следующий проект", exact: true }),
+    page.getByRole("button", { name: words["projects.text08"], exact: true }),
   ).toBeDisabled();
+  if (archive.length < 3) return;
   await page
-    .getByRole("button", { name: "Предыдущий проект", exact: true })
+    .getByRole("button", { name: words["projects.text07"], exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "Следующий проект", exact: true }),
+    page.getByRole("button", { name: words["projects.text08"], exact: true }),
   ).toBeEnabled();
 });
 test("Профиль, интерактивные направления, семь орбит и исследовательские заметки", async ({
@@ -98,15 +124,11 @@ test("Профиль, интерактивные направления, сем�
 }) => {
   await posterMode(page);
   await page.goto("/");
-  await page
-    .getByRole("tab", { name: "Digital Products", exact: true })
-    .click();
-  await expect(page.getByRole("tabpanel")).toContainText(
-    "Начинаю с конкретной задачи",
-  );
+  await page.getByRole("tab", { name: dirs[1].title, exact: true }).click();
+  await expect(page.getByRole("tabpanel")).toContainText(dirs[1].text);
   await page.keyboard.press("ArrowRight");
   await expect(
-    page.getByRole("tab", { name: "Creative Development", exact: true }),
+    page.getByRole("tab", { name: dirs[2].title, exact: true }),
   ).toHaveAttribute("aria-selected", "true");
   const nodes = page.locator(".orbit-node");
   await expect(nodes).toHaveCount(7);
@@ -114,14 +136,14 @@ test("Профиль, интерактивные направления, сем�
     await nodes.nth(i).click();
     await expect(nodes.nth(i)).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator(".inspector-kicker")).toContainText(
-      "0" + (i + 1),
+      words["world.text04"] + (i + 1),
     );
   }
   const fields = page.locator(".interest-card");
   for (let i = 0; i < 7; i++) {
     await fields.nth(i).click();
     await expect(page.locator("dialog .study-art")).toBeVisible();
-    await page.getByRole("button", { name: "Закрыть окно" }).click();
+    await page.getByRole("button", { name: words["interface.text02"] }).click();
   }
 });
 test("Посетитель видит только опубликованный профиль, а личные настройки сохраняются", async ({
@@ -147,14 +169,16 @@ test("Посетитель видит только опубликованный 
   await expect(page.locator(".contact-channels button")).toHaveCount(0);
   await expect(page.locator(".identity-card button")).toHaveCount(0);
   await page
-    .getByRole("button", { name: "Настройки пространства", exact: true })
+    .getByRole("button", { name: words["settings.title"], exact: true })
     .click();
   await expect(page.locator("dialog input")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Профиль и контакты", exact: true }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "Серебро", exact: true }).click();
-  await page.getByRole("switch", { name: "Интерактивный курсор" }).click();
+  await page
+    .getByRole("button", { name: words["settings.text05"], exact: true })
+    .click();
+  await page.getByRole("switch", { name: words["settings.text10"] }).click();
   await page.keyboard.press("Escape");
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
@@ -166,11 +190,8 @@ test("Мобильное меню, компоновка 320–1920 px, отсу�
   await posterMode(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  await page.getByRole("button", { name: "Открыть меню" }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("link", { name: /Контакты/ })
-    .click();
+  await page.getByRole("button", { name: words["nav.text03"] }).click();
+  await page.getByRole("dialog").locator('nav a[href="#contacts"]').click();
   await expect(page).toHaveURL(/#contacts$/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   for (const width of [
@@ -204,9 +225,11 @@ test("Без WebGL, reduced motion и доступность в обеих те�
   for (const theme of ["dark", "light"]) {
     if (theme === "light") {
       await page
-        .getByRole("button", { name: "Настройки пространства", exact: true })
+        .getByRole("button", { name: words["settings.title"], exact: true })
         .click();
-      await page.getByRole("button", { name: "Серебро", exact: true }).click();
+      await page
+        .getByRole("button", { name: words["settings.text05"], exact: true })
+        .click();
       await page.keyboard.press("Escape");
     }
     const report = await new AxeBuilder({ page })
@@ -258,6 +281,7 @@ test("Пять нажатий, пароль и изолированный чер
   await expect(
     page.getByRole("heading", { name: "Панель владельца" }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Профиль", exact: true }).click();
   await page.getByLabel("Имя или псевдоним").fill("Preview identity");
   await page
     .getByLabel("Telegram", { exact: true })
@@ -273,12 +297,12 @@ test("Пять нажатий, пароль и изолированный чер
   const packet = await page
     .getByLabel("Пакет изменений", { exact: true })
     .inputValue();
-  expect(packet).toMatch(/^CH1\./);
+  expect(packet).toMatch(/^CH2\./);
   const body = JSON.parse(
     Buffer.from(packet.split(".")[1], "base64url").toString(),
   );
-  expect(body.profile.name).toBe("Preview identity");
-  expect(body.profile.contacts.email).toBe("preview@example.org");
+  expect(body.patch.profile.name).toBe("Preview identity");
+  expect(body.patch.profile.contacts.email).toBe("preview@example.org");
   await expect(
     page.getByRole("link", { name: "Открыть GitHub" }),
   ).toHaveAttribute("href", /actions\/workflows\/owner-profile\.yml$/);
@@ -295,33 +319,39 @@ test("Мышью листаются галерея, досье, направле
 }) => {
   await posterMode(page);
   await page.goto("/");
-  await drag(page, ".project-rail", -190);
-  await expect
-    .poll(() => page.locator(".project-rail").evaluate((el) => el.scrollLeft))
-    .toBeGreaterThan(100);
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page
-    .getByRole("button", {
-      name: "Подробнее о проекте Charon Trading",
-      exact: true,
-    })
-    .click();
-  await drag(page, "dialog .product-art", -120);
-  await expect(page.locator("dialog .modal-title")).toHaveText("AI-агенты");
-  await page.keyboard.press("ArrowLeft");
-  await expect(page.locator("dialog .modal-title")).toHaveText(
-    "Charon Trading",
-  );
-  await page.keyboard.press("Escape");
+  if (archive.length >= 3) {
+    await drag(page, ".project-rail", -190);
+    await expect
+      .poll(() => page.locator(".project-rail").evaluate((el) => el.scrollLeft))
+      .toBeGreaterThan(100);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await page
+      .locator(".project-rail .project-card")
+      .nth(1)
+      .getByRole("button")
+      .click();
+    await drag(page, "dialog .product-art", -120);
+    await expect(page.locator("dialog .modal-title")).toHaveText(
+      archive[2].name,
+    );
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.locator("dialog .modal-title")).toHaveText(
+      archive[1].name,
+    );
+    await page.keyboard.press("Escape");
+  }
   await drag(page, ".field-note", -115);
-  await expect(
-    page.getByRole("tab", { name: "Digital Products" }),
-  ).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: dirs[1].title })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
   await drag(page, ".atlas-stage", -115);
-  await expect(page.locator(".inspector-kicker")).toContainText("02");
+  await expect(page.locator(".inspector-content h3")).toHaveText(
+    orbits[1].title,
+  );
   await page.locator(".interest-card").first().click();
   await drag(page, "dialog .study-art", -120);
-  await expect(page.locator("dialog .modal-title")).toHaveText("Programming");
+  await expect(page.locator("dialog .modal-title")).toHaveText(notes[1].title);
   await page.keyboard.press("Escape");
 });
 test("На сенсорном экране работают настоящие горизонтальные свайпы", async ({
@@ -356,10 +386,12 @@ test("На сенсорном экране работают настоящие �
       touchPoints: [],
     });
   };
-  await swipe(".project-rail");
-  await expect
-    .poll(() => page.locator(".project-rail").evaluate((e) => e.scrollLeft))
-    .toBeGreaterThan(100);
+  if (archive.length >= 2) {
+    await swipe(".project-rail");
+    await expect
+      .poll(() => page.locator(".project-rail").evaluate((e) => e.scrollLeft))
+      .toBeGreaterThan(100);
+  }
   await swipe(".interest-wall");
   await expect
     .poll(() => page.locator(".interest-wall").evaluate((e) => e.scrollLeft))
@@ -367,8 +399,6 @@ test("На сенсорном экране работают настоящие �
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.locator(".interest-card").nth(1).tap();
   await swipe("dialog .study-art");
-  await expect(page.locator("dialog .modal-title")).toHaveText(
-    "Crypto Analytics",
-  );
+  await expect(page.locator("dialog .modal-title")).toHaveText(notes[2].title);
   await context.close();
 });

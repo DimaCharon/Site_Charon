@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUpRight, SlidersHorizontal, Menu } from "lucide-react";
 import { navigation } from "../config/site";
@@ -59,14 +60,14 @@ export function Header({ onSettings }: { onSettings: () => void }) {
     <>
       <header className="header">
         <div className="shell header-inner">
-          <a className="brand" href="#home" aria-label="Charon — на главную">
+          <a className="brand" href="#home" aria-label={copy["nav.text01"]}>
             <Mark />
-            <span>CHARON</span>
+            <span>{copy["nav.brand"]}</span>
           </a>
           <nav
             className="desktop-nav"
             ref={nav}
-            aria-label="Основная навигация"
+            aria-label={copy["nav.text02"]}
           >
             <i
               className="nav-indicator"
@@ -90,19 +91,19 @@ export function Header({ onSettings }: { onSettings: () => void }) {
           <div className="header-actions">
             <button
               className="settings-trigger"
-              aria-label="Настройки пространства"
-              title="Настройки пространства"
+              aria-label={copy["settings.title"]}
+              title={copy["settings.title"]}
               onClick={onSettings}
             >
               <SlidersHorizontal size={17} strokeWidth={1.45} />
             </button>
             <a className="contact-nav" href="#contacts">
-              Связаться
+              {copy["nav.contact"]}
               <ArrowUpRight size={15} />
             </a>
             <button
               className="mobile-menu icon-button"
-              aria-label="Открыть меню"
+              aria-label={copy["nav.text03"]}
               aria-expanded={mobile}
               onClick={() => setMobile(true)}
             >
@@ -113,12 +114,12 @@ export function Header({ onSettings }: { onSettings: () => void }) {
       </header>
       {mobile && (
         <Modal
-          title="Навигация"
-          eyebrow="CHARON / INDEX"
+          title={copy["nav.text04"]}
+          eyebrow={copy["nav.text05"]}
           onClose={() => setMobile(false)}
           className="menu-modal"
         >
-          <nav aria-label="Мобильная навигация">
+          <nav aria-label={copy["nav.text06"]}>
             {navigation.map((n, i) => (
               <a key={n.id} href={"#" + n.id} onClick={() => setMobile(false)}>
                 <span className="mono">0{i + 1}</span>

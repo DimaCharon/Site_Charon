@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import { usePagingGesture } from "../hooks/gestures";
 import { useRef, useState } from "react";
 import {
@@ -24,18 +25,18 @@ export function About({ name }: { name: string }) {
     >
       <div className="about-grid">
         <div className="about-copy reveal">
-          <SectionLabel num="01">ЛИЧНЫЙ ПРОФИЛЬ</SectionLabel>
+          <SectionLabel num={copy["about.number"]}>
+            {copy["about.text01"]}
+          </SectionLabel>
           <h2 id="about-title">
-            Немного обо мне<span className="accent">.</span>
+            {copy["about.title"]}
+            <span className="accent">{copy["about.endMark"]}</span>
           </h2>
           <p className="about-intro">
-            Не просто использую технологии — <em>экспериментирую, создаю</em> и
-            превращаю идеи в реальные продукты.
+            {copy["about.lead1"]} <em>{copy["about.lead2"]}</em>{" "}
+            {copy["about.lead3"]}
           </p>
-          <p className="body-copy">
-            Разрабатываю сайты, приложения и собственные инструменты. Изучаю
-            AI-модели и рынки. Всё это соединяется в одной экосистеме — Charon.
-          </p>
+          <p className="body-copy">{copy["about.description"]}</p>
         </div>
         <div className="identity-card reveal">
           <div className="id-mesh" />
@@ -43,20 +44,20 @@ export function About({ name }: { name: string }) {
           <div className="id-top">
             <span className="mono">
               <ScanLine size={15} />
-              IDENTITY CARD
+              {copy["about.text02"]}
             </span>
             <LockKeyhole
               size={12}
               className="profile-seal"
-              aria-label="Профиль владельца"
+              aria-label={copy["about.text03"]}
             />
           </div>
           <div className="id-name">{name}</div>
-          <div className="id-role">Independent digital creator</div>
+          <div className="id-role">{copy["about.role"]}</div>
           <div className="id-bottom">
             <span className="mono">
               <span className="id-square" />
-              PERSONAL IDENTITY
+              {copy["about.text04"]}
             </span>
             <div className="barcode" aria-hidden="true" />
           </div>
@@ -66,12 +67,13 @@ export function About({ name }: { name: string }) {
       <div className="direction-console reveal" ref={fields}>
         <div className="direction-heading mono">
           <FingerprintIcon size={13} />
-          НАПРАВЛЕНИЯ<span>SWIPE / SELECT</span>
+          {copy["about.text05"]}
+          <span>{copy["about.text06"]}</span>
         </div>
         <div
           className="direction-tabs"
           role="tablist"
-          aria-label="Направления деятельности"
+          aria-label={copy["about.text07"]}
         >
           {directions.map((d, i) => (
             <button

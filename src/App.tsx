@@ -1,3 +1,4 @@
+import { copy } from "./config/site";
 import { lazy, Suspense, useState } from "react";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
@@ -24,7 +25,7 @@ export default function App() {
   return (
     <>
       <a href="#main" className="skip-link">
-        Перейти к содержанию
+        {copy["interface.text05"]}
       </a>
       <Header onSettings={() => setSettings(true)} />
       <main id="main">
@@ -54,7 +55,7 @@ export default function App() {
           <OwnerPanel profile={profile} onClose={() => setOwner(false)} />
         </Suspense>
       )}
-      {project !== null && (
+      {project !== null && projects[project] && (
         <ProjectModal
           index={project}
           onStep={(d) =>
@@ -81,3 +82,5 @@ export default function App() {
 }
 
 import "./styles/owner-and-gestures.css";
+
+import "./styles/projects-media.css";

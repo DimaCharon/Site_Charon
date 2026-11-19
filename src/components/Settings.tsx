@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import type { Dispatch, SetStateAction } from "react";
 import { Sun, Moon, Check } from "lucide-react";
 import { Modal } from "./ui";
@@ -40,15 +41,15 @@ export function Settings({
 }) {
   return (
     <Modal
-      title="Настройки пространства"
+      title={copy["settings.title"]}
       onClose={onClose}
-      eyebrow="PREFERENCES / INTERFACE"
+      eyebrow={copy["settings.text01"]}
     >
       {" "}
       <div className="settings-body">
         <div className="setting-head">
-          <h3>Оформление</h3>
-          <p>Выберите материал пространства.</p>
+          <h3>{copy["settings.text02"]}</h3>
+          <p>{copy["settings.text03"]}</p>
         </div>
         <div className="theme-choices">
           {(["dark", "light"] as const).map((t) => (
@@ -59,22 +60,20 @@ export function Settings({
               aria-pressed={prefs.theme === t}
             >
               {t === "dark" ? <Moon size={17} /> : <Sun size={17} />}{" "}
-              {t === "dark" ? "Графит" : "Серебро"}
+              {t === "dark" ? copy["settings.text04"] : copy["settings.text05"]}
               {prefs.theme === t && <Check size={15} />}
             </button>
           ))}
         </div>
         <div className="setting-row">
           <div>
-            <h3>Движение</h3>
+            <h3>{copy["settings.text06"]}</h3>
             <p>
-              {systemReduce
-                ? "Отключено системной настройкой reduced motion."
-                : "Мягкие переходы и движение 3D-объекта."}
+              {systemReduce ? copy["settings.text07"] : copy["settings.text08"]}
             </p>
           </div>
           <Switch
-            label="Анимации интерфейса"
+            label={copy["settings.text09"]}
             value={prefs.motion && !systemReduce}
             disabled={systemReduce}
             onChange={() => setPrefs((p) => ({ ...p, motion: !p.motion }))}
@@ -82,18 +81,18 @@ export function Settings({
         </div>
         <div className="setting-row">
           <div>
-            <h3>Интерактивный курсор</h3>
-            <p>Тонкий контур у активных элементов на десктопе.</p>
+            <h3>{copy["settings.text10"]}</h3>
+            <p>{copy["settings.text11"]}</p>
           </div>
           <Switch
-            label="Интерактивный курсор"
+            label={copy["settings.text10"]}
             value={prefs.cursor}
             onChange={() => setPrefs((p) => ({ ...p, cursor: !p.cursor }))}
           />
         </div>
         <p className="local-note">
           <span className="status-dot" />
-          Настройки сохраняются в этом браузере.
+          {copy["settings.text12"]}
         </p>
       </div>
     </Modal>

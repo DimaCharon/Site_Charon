@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import { usePagingGesture } from "../hooks/gestures";
 import { useState, useRef } from "react";
 import { ArrowLeft, ArrowRight, Orbit } from "lucide-react";
@@ -19,19 +20,23 @@ export function World({ name }: { name: string }) {
     >
       <div className="shell world-layout" ref={surface}>
         <div className="world-copy reveal">
-          <SectionLabel num="03">КАРТА ИНТЕРЕСОВ</SectionLabel>
+          <SectionLabel num={copy["world.number"]}>
+            {copy["world.text01"]}
+          </SectionLabel>
           <h2 id="world-title">
-            My Digital <span className="accent">World.</span>
+            {copy["world.title1"]}{" "}
+            <span className="accent">{copy["world.title2"]}</span>
           </h2>
           <p className="section-intro">
-            Семь направлений. Один центр притяжения.
+            {copy["world.text02"]}
             <br />
-            Выберите объект или листайте орбиты свайпом.
+            {copy["world.text03"]}
           </p>
           <div className="world-inspector" aria-live="polite">
             <div className="inspector-kicker mono">
               <Orbit size={13} />
-              ORBIT — 0{selected + 1} / 07
+              {copy["world.text04"]}
+              {selected + 1} / {String(worlds.length).padStart(2, "0")}
             </div>
             <div className="inspector-content" key={node.kind}>
               <GenerativeArt kind={node.kind} />
@@ -48,14 +53,14 @@ export function World({ name }: { name: string }) {
               </div>
               <button
                 className="plain-icon"
-                aria-label="Предыдущая орбита"
+                aria-label={copy["world.text05"]}
                 onClick={() => setSelected((i) => (i + 6) % 7)}
               >
                 <ArrowLeft size={15} />
               </button>
               <button
                 className="plain-icon"
-                aria-label="Следующая орбита"
+                aria-label={copy["world.text06"]}
                 onClick={() => setSelected((i) => (i + 1) % 7)}
               >
                 <ArrowRight size={15} />
@@ -65,7 +70,7 @@ export function World({ name }: { name: string }) {
         </div>
         <div className="atlas-stage reveal">
           <Corners />
-          <div className="atlas-label mono">ATLAS / CH—01</div>
+          <div className="atlas-label mono">{copy["world.text07"]}</div>
           <svg
             className="orbital-lines"
             viewBox="0 0 600 450"
@@ -120,7 +125,7 @@ export function World({ name }: { name: string }) {
               src={`${import.meta.env.BASE_URL}art/identity.webp`}
               width="900"
               height="680"
-              alt="Ядро цифровой идентичности"
+              alt={copy["world.text08"]}
               loading="lazy"
             />
             <span className="mono">{name}</span>
@@ -135,7 +140,7 @@ export function World({ name }: { name: string }) {
                 animationDelay: `${-i * 0.8}s`,
               }}
               onClick={() => setSelected(i)}
-              aria-label={"Исследовать: " + w.label}
+              aria-label={copy["world.text09"] + " " + w.label}
               aria-pressed={i === selected}
             >
               <span className="satellite">
@@ -146,7 +151,7 @@ export function World({ name }: { name: string }) {
           ))}
           <div className="atlas-footer mono">
             <span className="status-dot" />
-            INTERACTIVE SYSTEM
+            {copy["world.text10"]}
           </div>
         </div>
       </div>

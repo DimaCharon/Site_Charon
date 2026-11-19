@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import * as T from "three";
 
 type Point = [number, number];
@@ -234,10 +235,10 @@ function makeArtifact(brush: T.Texture) {
   ctx.fillStyle = "#23252c";
   ctx.textAlign = "center";
   ctx.font = "600 122px Arial, sans-serif";
-  ctx.fillText("C H A R O N", 512, 121);
+  ctx.fillText([...copy["studio.engraving"]].join(" "), 512, 121, 970);
   ctx.font = "32px monospace";
   ctx.fillStyle = "#44464e";
-  ctx.fillText("I D E N T I T Y   S Y S T E M", 512, 183);
+  ctx.fillText([...copy["studio.engravingSub"]].join(" "), 512, 183, 970);
   const lt = new T.CanvasTexture(label);
   lt.colorSpace = T.SRGBColorSpace;
   lt.anisotropy = 8;

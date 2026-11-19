@@ -1,23 +1,23 @@
 /** Build a portable, completely offline edition of the same interactive site. */
 import { build } from "vite";
 import { createHash } from "node:crypto";
-import { normalizeProfile } from "../shared/profile-schema.mjs";
 import react from "@vitejs/plugin-react";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 
+import { loadPublished } from "./published-data.mjs";
+import { publishMetadata } from "../shared/metadata.mjs";
+const { profile, content, media: inlineMedia } = loadPublished("public", true);
 const hasMascot = existsSync("public/models/charon.glb");
 const result = await build({
   configFile: false,
   plugins: [react()],
   base: "./",
   define: {
+    __CHARON_CONTENT__: JSON.stringify(content),
+    __CHARON_MEDIA__: JSON.stringify(inlineMedia),
     __HAS_MASCOT__: JSON.stringify(hasMascot),
-    __CHARON_PROFILE__: JSON.stringify(
-      normalizeProfile(
-        JSON.parse(await readFile("public/identity.json", "utf8")),
-      ),
-    ),
+    __CHARON_PROFILE__: JSON.stringify(profile),
   },
   build: {
     write: false,
@@ -62,7 +62,7 @@ for (const name of ["manrope-cyrillic.woff2", "manrope-latin.woff2"]) {
 const script = js.replace(/<\/script/gi, "<\\/script");
 const hash = createHash("sha256").update(script).digest("base64");
 const policy = `default-src 'none'; script-src 'sha256-${hash}'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src data: blob:; worker-src blob:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'`;
-html = html
+html = publishMetadata(html, content.copy)
   .replace(
     "<head>",
     () =>

@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import { useRef } from "react";
 import { useRailDrag } from "../hooks/gestures";
 import { ArrowUpRight } from "lucide-react";
@@ -13,12 +14,17 @@ export function Interests({ onOpen }: { onOpen: (i: number) => void }) {
       className="section shell interests-section"
       aria-labelledby="interests-title"
     >
-      <SectionLabel num="04">ИССЛЕДОВАТЕЛЬСКИЙ ИНДЕКС</SectionLabel>
+      <SectionLabel num={copy["interests.number"]}>
+        {copy["interests.text01"]}
+      </SectionLabel>
       <div className="section-heading-row reveal">
         <h2 id="interests-title">
-          Мои интересы<span className="accent">.</span>
+          {copy["interests.title"]}
+          <span className="accent">{copy["interests.endMark"]}</span>
         </h2>
-        <span className="section-side-note mono">RESEARCH FIELDS / 07</span>
+        <span className="section-side-note mono">
+          {copy["interests.text02"]}
+        </span>
       </div>
       <div ref={rail} className="interest-wall drag-rail">
         {interests.map((item, i) => (
@@ -28,7 +34,10 @@ export function Interests({ onOpen }: { onOpen: (i: number) => void }) {
             onClick={() => onOpen(i)}
           >
             <span className="interest-top">
-              <span className="mono">FIELD / 0{i + 1}</span>
+              <span className="mono">
+                {copy["interests.text03"]}
+                {i + 1}
+              </span>
               <ArrowUpRight size={15} />
             </span>
             {i < 3 ? (
@@ -61,7 +70,7 @@ export function InterestModal({
   return (
     <Modal
       title={f.title}
-      eyebrow={`FIELD NOTES / 0${index + 1}`}
+      eyebrow={`${copy["interests.dossier"]} / ${String(index + 1).padStart(2, "0")}`}
       onClose={onClose}
       className="interest-modal"
       onStep={onStep}
@@ -70,10 +79,10 @@ export function InterestModal({
       <div className="study-art">
         <GenerativeArt kind={f.kind} />
       </div>
-      <div className="sub-label mono">ИССЛЕДОВАТЕЛЬСКИЙ ВОПРОС</div>
+      <div className="sub-label mono">{copy["interests.text04"]}</div>
       <h3>{f.question}</h3>
       <p className="dossier-text">{f.note}</p>
-      <div className="note-sign mono">CHARON / PERSONAL RESEARCH</div>
+      <div className="note-sign mono">{copy["interests.text05"]}</div>
     </Modal>
   );
 }

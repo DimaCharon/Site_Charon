@@ -1,7 +1,8 @@
+import { copy } from "../config/site";
 import { useRailDrag } from "../hooks/gestures";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Plus } from "lucide-react";
-import { projects, type Project } from "../config/site";
+import { projects, coverUrl, statusLabel, type Project } from "../config/site";
 import { GenerativeArt } from "./Art";
 import { SectionLabel, Modal } from "./ui";
 export function tilt(e: PointerEvent<HTMLElement>) {
@@ -20,7 +21,13 @@ export function tilt(e: PointerEvent<HTMLElement>) {
     `${((e.clientX - b.left - b.width / 2) / b.width) * 4}deg`,
   );
 }
-function Status({ project }: { project: Project }) {
+export function Status({
+  project,
+  words = copy,
+}: {
+  project: Project;
+  words?: Record<string, string>;
+}) {
   return (
     <span
       className={
@@ -33,29 +40,149 @@ function Status({ project }: { project: Project }) {
       }
     >
       <i />
-      {project.status}
+      {statusLabel(project.status, words)}
     </span>
   );
 }
-function ProductArt({ project, index }: { project: Project; index: number }) {
+export function ProductArt({
+  project,
+  index,
+  previewSrc,
+  words = copy,
+}: {
+  project: Project;
+  index: number;
+  previewSrc?: string;
+  words?: Record<string, string>;
+}) {
   return (
-    <div className={"product-art product-" + project.art}>
+    <div
+      className={
+        "product-art product-" +
+        project.art +
+        " material-" +
+        project.theme +
+        (project.cover ? " with-cover" : "")
+      }
+    >
       <div className="art-grid" />
       <div className="art-topline mono">
-        <span>CH / {String(index + 1).padStart(2, "0")}</span>
+        <span>
+          {words["projects.text01"]} {String(index + 1).padStart(2, "0")}
+        </span>
         <span>{project.category}</span>
       </div>
-      <GenerativeArt kind={project.art} />
+      {project.cover ? (
+        <img
+          className="project-cover"
+          src={previewSrc || coverUrl(project.cover)}
+          alt={project.cover.alt || project.name}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          width={1200}
+          height={680}
+          style={{
+            objectFit: project.cover.fit,
+            objectPosition: `${project.cover.x}% ${project.cover.y}%`,
+          }}
+        />
+      ) : (
+        <GenerativeArt kind={project.art} />
+      )}
       <div className="project-hover-note">{project.details[0]}</div>
       <div className="art-bottomline mono">
-        {project.art === "identity"
-          ? "IDENTITY SERIES"
-          : project.art === "trading"
-            ? "DATA LANDSCAPE · ÉTUDE"
-            : "EXPERIMENTAL STUDY"}
+        {project.caption ||
+          (project.cover
+            ? words["projects.photoCaption"]
+            : project.art === "identity"
+              ? words["projects.text02"]
+              : project.art === "trading"
+                ? words["projects.text03"]
+                : words["projects.text04"])}
         <Plus size={11} />
       </div>
     </div>
+  );
+}
+export function ProjectCard({
+  p,
+  i,
+  words = copy,
+  previewSrc,
+  onOpen,
+}: {
+  p: Project;
+  i: number;
+  words?: Record<string, string>;
+  previewSrc?: string;
+  onOpen: () => void;
+}) {
+  return (
+    <article
+      className="project-card"
+      onPointerMove={tilt}
+      onPointerLeave={(e) => {
+        e.currentTarget.style.setProperty("--rx", "0deg");
+        e.currentTarget.style.setProperty("--ry", "0deg");
+      }}
+    >
+      <ProductArt project={p} index={i} words={words} previewSrc={previewSrc} />
+      <div className="project-info">
+        <Status project={p} words={words} />
+        <h3>{p.name}</h3>
+        <p>{p.short}</p>
+        <button
+          className="project-link"
+          onClick={onOpen}
+          aria-label={words["projects.more"] + " " + p.name}
+        >
+          {words["projects.more"]}
+          <ArrowUpRight size={15} />
+        </button>
+      </div>
+    </article>
+  );
+}
+export function ProjectDossier({
+  p,
+  index,
+  words = copy,
+  previewSrc,
+}: {
+  p: Project;
+  index: number;
+  words?: Record<string, string>;
+  previewSrc?: string;
+}) {
+  return (
+    <>
+      {" "}
+      <ProductArt
+        project={p}
+        index={index}
+        words={words}
+        previewSrc={previewSrc}
+      />
+      <div className="dossier-meta">
+        <Status project={p} words={words} />
+        <span className="mono">{p.category}</span>
+      </div>
+      <p className="dossier-text">{p.description}</p>
+      <h3 className="sub-label mono" hidden={!p.details.length}>
+        {words["projects.text05"]}
+      </h3>
+      <ul className="detail-list">
+        {p.details.map((t, i) => (
+          <li key={i}>{t}</li>
+        ))}
+      </ul>
+      <div className="tag-row">
+        {p.tags.map((tag, i) => (
+          <span key={i}>{tag}</span>
+        ))}
+      </div>
+    </>
   );
 }
 export function ProjectModal({
@@ -71,29 +198,13 @@ export function ProjectModal({
   return (
     <Modal
       title={p.name}
-      eyebrow={`PROJECT DOSSIER / 0${index + 1}`}
+      eyebrow={`${copy["projects.dossier"]} / ${String(index + 1).padStart(2, "0")}`}
       onClose={onClose}
       className="project-modal"
-      onStep={onStep}
+      onStep={projects.length > 1 ? onStep : undefined}
       page={{ index, total: projects.length }}
     >
-      <ProductArt project={p} index={index} />
-      <div className="dossier-meta">
-        <Status project={p} />
-        <span className="mono">{p.category}</span>
-      </div>
-      <p className="dossier-text">{p.description}</p>
-      <h3 className="sub-label mono">В ФОКУСЕ ПРОЕКТА</h3>
-      <ul className="detail-list">
-        {p.details.map((t) => (
-          <li key={t}>{t}</li>
-        ))}
-      </ul>
-      <div className="tag-row">
-        {p.tags.map((tag) => (
-          <span key={tag}>{tag}</span>
-        ))}
-      </div>
+      <ProjectDossier p={p} index={index} />
     </Modal>
   );
 }
@@ -102,7 +213,8 @@ export function Projects({ onOpen }: { onOpen: (index: number) => void }) {
     [range, setRange] = useState({ first: 0, last: 1, end: false });
   useRailDrag(rail);
   useEffect(() => {
-    const el = rail.current!;
+    const el = rail.current;
+    if (!el || !projects.length) return;
     let raf = 0;
     const update = () => {
       raf = 0;
@@ -135,7 +247,8 @@ export function Projects({ onOpen }: { onOpen: (index: number) => void }) {
     };
   }, []);
   const go = (delta: number) => {
-    const el = rail.current!;
+    const el = rail.current;
+    if (!el || !projects.length) return;
     const item = el.children[
       Math.max(0, Math.min(projects.length - 1, range.first + delta))
     ] as HTMLElement;
@@ -154,45 +267,51 @@ export function Projects({ onOpen }: { onOpen: (index: number) => void }) {
       aria-labelledby="projects-title"
     >
       <div className="shell">
-        <SectionLabel num="02">ПРОЕКТНЫЙ АРХИВ</SectionLabel>
+        <SectionLabel num={copy["projects.number"]}>
+          {copy["projects.text06"]}
+        </SectionLabel>
         <div className="section-heading-row reveal">
           <div>
             <h2 id="projects-title">
-              То, что я создаю<span className="accent">.</span>
+              {copy["projects.title"]}
+              <span className="accent">{copy["projects.endMark"]}</span>
             </h2>
-            <p className="section-intro">
-              Самостоятельные продукты, рабочие прототипы и идеи на проверке.
-            </p>
+            <p className="section-intro">{copy["projects.intro"]}</p>
           </div>
-          <div className="rail-nav">
-            <span className="mono">
-              0{range.first + 1}
-              <b> / 0{projects.length}</b>
-            </span>
-            <button
-              className="icon-button"
-              aria-label="Предыдущий проект"
-              disabled={range.first === 0}
-              onClick={() => go(-1)}
-            >
-              <ArrowLeft size={16} />
-            </button>
-            <button
-              className="icon-button"
-              aria-label="Следующий проект"
-              disabled={range.end}
-              onClick={() => go(1)}
-            >
-              <ArrowRight size={16} />
-            </button>
-          </div>
+          {projects.length > 0 && (
+            <div className="rail-nav">
+              <span className="mono">
+                {String(range.first + 1).padStart(2, "0")}
+                <b> / {String(projects.length).padStart(2, "0")}</b>
+              </span>
+              <button
+                className="icon-button"
+                aria-label={copy["projects.text07"]}
+                disabled={range.first === 0}
+                onClick={() => go(-1)}
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <button
+                className="icon-button"
+                aria-label={copy["projects.text08"]}
+                disabled={range.end}
+                onClick={() => go(1)}
+              >
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
+        {!projects.length && (
+          <div className="empty-projects">{copy["projects.empty"]}</div>
+        )}
         <div
           className="project-rail reveal drag-rail"
           ref={rail}
           role="region"
-          aria-label="Горизонтальная галерея проектов"
-          tabIndex={0}
+          aria-label={copy["projects.text09"]}
+          tabIndex={projects.length ? 0 : -1}
           onKeyDown={(e) => {
             if (
               e.target === e.currentTarget &&
@@ -204,44 +323,21 @@ export function Projects({ onOpen }: { onOpen: (index: number) => void }) {
           }}
         >
           {projects.map((p, i) => (
-            <article
-              className="project-card"
-              key={p.name}
-              onPointerMove={tilt}
-              onPointerLeave={(e) => {
-                e.currentTarget.style.setProperty("--rx", "0deg");
-                e.currentTarget.style.setProperty("--ry", "0deg");
-              }}
-            >
-              <ProductArt project={p} index={i} />
-              <div className="project-info">
-                <Status project={p} />
-                <h3>{p.name}</h3>
-                <p>{p.short}</p>
-                <button
-                  className="project-link"
-                  onClick={() => onOpen(i)}
-                  aria-label={"Подробнее о проекте " + p.name}
-                >
-                  Подробнее о проекте
-                  <ArrowUpRight size={15} />
-                </button>
-              </div>
-            </article>
+            <ProjectCard key={p.id} p={p} i={i} onOpen={() => onOpen(i)} />
           ))}
         </div>
-        <div className="rail-bottom">
-          <span className="rail-gesture">← Листайте в сторону →</span>
+        <div className="rail-bottom" hidden={!projects.length}>
+          <span className="rail-gesture">{copy["projects.text10"]}</span>
           <div className="rail-track">
             <i
               style={{
-                left: `${(range.first / projects.length) * 100}%`,
-                width: `${((range.last - range.first + 1) / projects.length) * 100}%`,
+                left: `${(range.first / Math.max(1, projects.length)) * 100}%`,
+                width: `${((range.last - range.first + 1) / Math.max(1, projects.length)) * 100}%`,
               }}
             />
           </div>
           <span className="mono">
-            SELECTED WORK / {String(projects.length).padStart(2, "0")}
+            {copy["projects.text11"]} {String(projects.length).padStart(2, "0")}
           </span>
         </div>
       </div>

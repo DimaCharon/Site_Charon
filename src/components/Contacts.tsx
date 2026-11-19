@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import { useEffect, useRef } from "react";
 import {
   ArrowUp,
@@ -27,14 +28,17 @@ export function Contacts({ profile }: { profile: Profile }) {
         <Mark />
       </div>
       <div className="shell">
-        <SectionLabel num="05">КОНТАКТЫ</SectionLabel>
+        <SectionLabel num={copy["contacts.number"]}>
+          {copy["contacts.text01"]}
+        </SectionLabel>
         <div className="contact-heading reveal">
           <h2 id="contacts-title">
-            Есть интересная <span className="accent">идея?</span>
+            {copy["contacts.title1"]}{" "}
+            <span className="accent">{copy["contacts.title2"]}</span>
           </h2>
           <p>
-            Открыт к интересным проектам, экспериментам
-            <br className="wide-br" /> и технологическим решениям.
+            {copy["contacts.intro1"]}
+            <br className="wide-br" /> {copy["contacts.intro2"]}
           </p>
         </div>
         <div className="contact-channels">
@@ -45,11 +49,11 @@ export function Contacts({ profile }: { profile: Profile }) {
               <>
                 <Icon size={20} strokeWidth={1.4} />
                 <div>
-                  <strong>{contactNames[k]}</strong>
+                  <strong>{copy["contacts." + k]}</strong>
                   <span>
                     {href
                       ? profile.contacts[k].replace(/^https?:\/\//, "")
-                      : "Контакт не указан"}
+                      : copy["contacts.unset"]}
                   </span>
                 </div>
                 {href ? (
@@ -78,8 +82,8 @@ export function Contacts({ profile }: { profile: Profile }) {
         </div>
         <div className="contact-note">
           {Object.values(profile.contacts).some(Boolean)
-            ? "Выберите удобный способ связи."
-            : "Владелец пока не указал способы связи."}
+            ? copy["contacts.text02"]
+            : copy["contacts.text03"]}
         </div>
       </div>
     </section>
@@ -107,18 +111,18 @@ export function Footer({ onOwner }: { onOwner: () => void }) {
       <div className="shell footer-inner">
         <a className="brand small-brand" href="#home">
           <Mark />
-          <span>CHARON</span>
+          <span>{copy["footer.brand"]}</span>
         </a>
         <button
           type="button"
           className="mono owner-trigger"
           onClick={tap}
-          aria-label="PERSONAL DIGITAL IDENTITY"
+          aria-label={copy["footer.signature"]}
         >
-          PERSONAL DIGITAL IDENTITY
+          {copy["footer.signature"]}
         </button>
         <a className="back-top" href="#home">
-          Наверх
+          {copy["footer.top"]}
           <ArrowUp size={14} />
         </a>
       </div>

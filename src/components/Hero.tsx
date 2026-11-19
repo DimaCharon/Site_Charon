@@ -1,3 +1,4 @@
+import { copy } from "../config/site";
 import { useState } from "react";
 import {
   ArrowUpRight,
@@ -28,23 +29,22 @@ export function Hero({
           <div className="hero-copy">
             <div className="eyebrow intro-item">
               <Fingerprint size={14} />
-              <span>PERSONAL DIGITAL IDENTITY</span>
+              <span>{copy["hero.badge"]}</span>
             </div>
             <h1 id="hero-title">
-              <span className="intro-item">Создаю то,</span>
-              <span className="accent intro-item">чего ещё нет.</span>
+              <span className="intro-item">{copy["hero.title1"]}</span>
+              <span className="accent intro-item">{copy["hero.title2"]}</span>
             </h1>
             <p className="hero-description intro-item">
-              Технологии, искусственный интеллект, цифровые продукты и
-              эксперименты на пересечении идей и разработки.
+              {copy["hero.description"]}
             </p>
             <div className="hero-actions intro-item">
               <Magnetic href="#projects" className="primary">
-                Мои проекты
+                {copy["hero.primary"]}
                 <ArrowUpRight size={17} />
               </Magnetic>
               <Magnetic href="#about" className="secondary">
-                Обо мне
+                {copy["hero.secondary"]}
                 <ArrowDown size={15} />
               </Magnetic>
             </div>
@@ -53,17 +53,17 @@ export function Hero({
               <b className="author-divider" />
               <span>
                 <Sparkles size={12} />
-                AI
+                {copy["hero.text01"]}
               </span>
               <i />
               <span>
                 <Braces size={13} />
-                Development
+                {copy["hero.text02"]}
               </span>
               <i />
               <span>
                 <Layers2 size={12} />
-                Design
+                {copy["hero.text03"]}
               </span>
             </div>
           </div>
@@ -74,9 +74,9 @@ export function Hero({
               onExpand={() => setExpanded(true)}
             />
             <div className="figure-caption mono">
-              <span>FIG. 01</span>
+              <span>{copy["hero.text04"]}</span>
               <i />
-              CHARON IDENTITY OBJECT
+              {copy["hero.text05"]}
             </div>
           </div>
         </div>
@@ -84,14 +84,16 @@ export function Hero({
           <div className="shell hero-bottom-inner">
             <span className="system-status">
               <i className="status-dot" />
-              Система онлайн
+              {copy["hero.text06"]}
             </span>
             <span className="system-label mono">
               <i />
-              CHARON OS<span>/</span>PERSONAL SPACE
+              {copy["hero.text07"]}
+              <span>/</span>
+              {copy["hero.text08"]}
             </span>
             <a href="#about" className="scroll-link">
-              Листайте вниз
+              {copy["hero.text09"]}
               <ChevronDown size={13} />
             </a>
           </div>

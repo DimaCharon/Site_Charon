@@ -1,9 +1,9 @@
-name: Обновить профиль Charon
+name: Опубликовать правки Charon
 on:
   workflow_dispatch:
     inputs:
       packet:
-        description: Пакет изменений из панели владельца
+        description: Пакет изменений или имя файла из черновика релиза
         required: true
         type: string
       check_only:
@@ -18,7 +18,7 @@ jobs:
   update:
     if: github.actor == github.repository_owner && github.triggering_actor == github.repository_owner && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 8
     permissions:
       contents: write
       actions: write
@@ -26,18 +26,28 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Проверить владельца, подпись, срок, версию и данные
         id: profile
         env:
+          GH_TOKEN: ${{ github.token }}
           PROFILE_PACKET: ${{ inputs.packet }}
           PROFILE_SIGNING_KEY: ${{ secrets.CHARON_OWNER_SIGNING_V1 }}
           CHECK_ONLY: ${{ inputs.check_only }}
         run: node scripts/apply-owner-packet.mjs
-      - name: Записать только опубликованный профиль
+      - name: Записать только данные сайта и обложки
         if: steps.profile.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          git add -- public/identity.json
-          git -c user.name='Charon Publisher' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Обновление профиля владельцем' -- public/identity.json
+          gh auth setup-git
+          git add -A -- public/identity.json public/content.json public/media
+          git -c user.name='Charon Publisher' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Публикация материалов владельцем'
           git push origin HEAD:main
       - name: Опубликовать подтверждённую версию
         if: steps.profile.outputs.changed == 'true'
