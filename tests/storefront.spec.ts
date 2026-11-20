@@ -143,6 +143,8 @@ test("Доступность дополнительных страниц и мо
     "journal",
     "guide",
     "updates",
+    "references",
+    "contacts",
     ...content.projects.slice(0, 1).map((p: any) => "products/" + p.id),
     "journal/" + content.interests[0].kind,
   ]) {

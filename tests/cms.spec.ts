@@ -1,3 +1,4 @@
+import { handleContact } from "../relay/worker.mjs";
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import {
@@ -29,9 +30,14 @@ function errorsOn(page: Page) {
   return errors;
 }
 async function openEditor(page: Page) {
+  // The static footer is readable before React attaches its gesture listener.
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-motion",
+    /^(full|reduced)$/,
+  );
   const b = page.locator(".owner-trigger");
   await b.scrollIntoViewIfNeeded();
-  for (let i = 0; i < 5; i++) await b.click();
+  await b.click({ clickCount: 5, delay: 55 });
   await page.getByLabel("Код доступа", { exact: true }).fill(pin!);
   await page.getByRole("button", { name: "Войти", exact: true }).click();
   await expect(
@@ -522,6 +528,7 @@ test("Пустая опубликованная галерея и изменён
     );
     await expect(page.locator("#projects .rail-nav")).toHaveCount(0);
     await expect(page.locator("#projects .rail-bottom")).not.toBeVisible();
+    await page.locator('.footer-directory a[href="#/contacts"]').click();
     await expect(page.locator("#contacts-title")).toHaveText(
       "Есть вопрос о проекте?",
     );
@@ -623,6 +630,115 @@ test("Предложение по запросу в изолированной �
     );
     await p.close();
     expect(errors).toEqual([]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("Рабочий бриф → обработчик → подтверждённая доставка (изолированный Bot API); при ошибке данные не теряются", async ({
+  context,
+}) => {
+  test.setTimeout(75_000);
+  const dir = await workspace(),
+    target = "https://brief.example.test/contact",
+    site = "https://preview.test",
+    w = loadPublished().content.copy;
+  const messages: { text: string; chat_id: string }[] = [];
+  let upstream: "ok" | "busy" | "unknown" = "busy",
+    posts = 0;
+  const limit = { limit: async () => ({ success: true }) };
+  try {
+    await writeFile(
+      join(dir, "src/config/contact-delivery.json"),
+      JSON.stringify({ endpoint: target }),
+    );
+    await run(
+      process.execPath,
+      [
+        resolve("node_modules/vite/bin/vite.js"),
+        "build",
+        "--logLevel",
+        "error",
+      ],
+      { cwd: dir },
+    );
+    const p = await routedPreview(context, dir);
+    await p.route(target, async (route) => {
+      const req = route.request();
+      if (req.method() === "POST") posts++;
+      const r = await handleContact(
+        new Request(req.url(), {
+          method: req.method(),
+          headers: req.headers(),
+          ...(req.method() === "POST" ? { body: req.postData() } : {}),
+        }),
+        {
+          SITE_ORIGIN: site,
+          TELEGRAM_BOT_TOKEN: "123456:" + "y".repeat(35),
+          TELEGRAM_CHAT_ID: "123456",
+          VISITOR_LIMIT: limit,
+          INBOX_LIMIT: limit,
+        },
+        async (_url: string, opts: RequestInit) => {
+          if (upstream === "busy") return new Response("", { status: 429 });
+          if (upstream === "unknown") return Response.json({ ok: false });
+          messages.push(JSON.parse(String(opts.body)));
+          return Response.json({
+            ok: true,
+            result: { message_id: 15, chat: { id: 123456 } },
+          });
+        },
+      );
+      await route.fulfill({
+        status: r.status,
+        headers: Object.fromEntries(r.headers),
+        body: await r.text(),
+      });
+    });
+    await p.goto(site + "/Site_Charon/references/");
+    await p.locator('[data-reference="identity-object"]').click();
+    const send = p.getByRole("button", { name: w["brief.send"], exact: true }),
+      status = p.locator(".brief-status");
+    await send.click();
+    await expect(p.locator("#brief-name")).toBeFocused();
+    await p.locator("#brief-name").fill("Тест");
+    await p.locator("#brief-brand").fill("Тестовая студия");
+    await p
+      .locator("#brief-task")
+      .fill("Собрать страницу с трёхмерным знаком.");
+    await p.locator("#brief-reply").fill("bad");
+    await send.click();
+    await expect(p.locator("#brief-reply")).toBeFocused();
+    await p.locator("#brief-reply").fill("@test_artist");
+    await send.click();
+    await expect(p.locator("#brief-consent")).toBeFocused();
+    expect(posts).toBe(0);
+    await p.locator("#brief-consent").check();
+    await send.click();
+    await expect(status).toHaveText(w["brief.errBusy"]);
+    upstream = "unknown";
+    await send.click();
+    await expect(status).toHaveText(w["brief.errDelivery"]);
+    await expect(p.locator("#brief-name")).toHaveValue("Тест");
+    upstream = "ok";
+    await send.click();
+    await expect(
+      p.getByRole("heading", { name: w["brief.received"], exact: true }),
+    ).toBeVisible();
+    expect(messages).toHaveLength(1);
+    expect(messages[0].text).toContain(
+      "Референс: " + w["refs.identityTitle"] + " [identity-object]",
+    );
+    expect(messages[0].text).toContain("Бренд: Тестовая студия");
+    expect(messages[0].text).toContain("@test_artist");
+    await p
+      .getByRole("button", { name: w["brief.again"], exact: true })
+      .click();
+    await expect(p.locator("#brief-name")).toHaveValue("");
+    expect(await p.evaluate(() => JSON.stringify(localStorage))).not.toContain(
+      "@test_artist",
+    );
+    await p.close();
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

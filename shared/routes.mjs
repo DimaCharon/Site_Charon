@@ -1,5 +1,13 @@
 export const publicOrigin = "https://dimacharon.github.io/Site_Charon/";
-export const fixedPages = ["products", "lab", "journal", "guide", "updates"];
+export const fixedPages = [
+  "products",
+  "lab",
+  "journal",
+  "guide",
+  "updates",
+  "contacts",
+  "references",
+];
 export function publishedPaths(c) {
   return [
     "",
@@ -34,6 +42,8 @@ export function pageMeta(path, c, profile) {
     }
   } else {
     const item = {
+      references: ["refs.title", "refs.intro"],
+      contacts: ["nav.contacts", "contacts.intro1"],
       products: ["store.catalog", "store.catalogIntro"],
       lab: ["lab.title", "lab.intro"],
       journal: ["library.notes", "library.notesIntro"],

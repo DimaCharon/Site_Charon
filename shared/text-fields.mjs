@@ -1,3 +1,4 @@
+import { deskFields } from "./desk-fields.mjs";
 // Stable public copy slots. These labels describe the editing controls, not the published copy.
 import { storefrontFields } from "./storefront-fields.mjs";
 export const textFields = [
@@ -968,4 +969,5 @@ export const textFields = [
     max: 90,
   },
   ...storefrontFields,
+  ...deskFields,
 ];

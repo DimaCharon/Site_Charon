@@ -5,7 +5,10 @@ import { About } from "./components/About";
 import { Projects, ProjectModal } from "./components/Projects";
 import { World } from "./components/World";
 import { Interests, InterestModal } from "./components/Interests";
-import { Contacts, Footer } from "./components/Contacts";
+import { BriefDesk } from "./components/BriefDesk";
+import { References } from "./components/References";
+import { Snow } from "./components/Snow";
+import { Footer } from "./components/Contacts";
 import { Effects } from "./components/Effects";
 import { Settings } from "./components/Settings";
 import { usePreferences, publishedProfile } from "./config/profile";
@@ -26,6 +29,7 @@ import "./styles/responsive.css";
 import "./styles/owner-and-gestures.css";
 import "./styles/projects-media.css";
 import "./styles/atelier.css";
+import "./styles/desk.css";
 const OwnerPanel = lazy(() => import("./owner/OwnerPanel"));
 function Edition({ path }: { path: string }) {
   const { prefs, setPrefs, reduced, systemReduce } = usePreferences();
@@ -40,6 +44,10 @@ function Edition({ path }: { path: string }) {
     document.title = pageMeta(path, publishedContent, profile).title;
     const syncAnchor = () => {
       const h = location.hash;
+      if (!path && h === "#contacts") {
+        location.replace(pageHref("contacts"));
+        return;
+      }
       if (!path && (h === "#interests" || h === "#world")) {
         location.replace(pageHref("journal", h.slice(1)));
         return;
@@ -76,8 +84,11 @@ function Edition({ path }: { path: string }) {
             <Projects onOpen={setProject} />
             <LabInvitation />
             <About name={profile.name} />
-            <Contacts profile={profile} />
           </>
+        ) : path === "contacts" ? (
+          <BriefDesk />
+        ) : path === "references" ? (
+          <References />
         ) : path === "products" ? (
           <Catalog />
         ) : p ? (
@@ -110,6 +121,7 @@ function Edition({ path }: { path: string }) {
         )}
       </main>
       <Footer onOwner={() => setOwner(true)} />
+      {prefs.snow && !reduced && <Snow />}
       <Effects cursor={prefs.cursor} reduced={reduced} />
       {settings && (
         <Settings

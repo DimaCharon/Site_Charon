@@ -1,11 +1,16 @@
 import { staticEdition } from "./scripts/static-edition.mjs";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { existsSync } from "node:fs";
+import { contactEndpoint } from "./scripts/contact-endpoint.mjs";
+import { existsSync, readFileSync } from "node:fs";
 import { loadPublished } from "./scripts/published-data.mjs";
 import { publishMetadata } from "./shared/metadata.mjs";
 const { content, profile } = loadPublished();
+const endpoint = contactEndpoint(
+  JSON.parse(readFileSync("src/config/contact-delivery.json", "utf8")),
+);
 const define = {
+  __CHARON_CONTACT_ENDPOINT__: JSON.stringify(endpoint),
   __CHARON_OFFLINE__: "false",
   __CHARON_ASSETS__: "{}",
   __CHARON_CONTENT__: JSON.stringify(content),
@@ -14,7 +19,9 @@ const define = {
   __CHARON_PROFILE__: JSON.stringify(profile),
 };
 const rules =
-  "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'";
+  "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:" +
+  (endpoint ? " " + endpoint : "") +
+  "; worker-src 'self' blob:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'";
 export default defineConfig({
   plugins: [
     react(),

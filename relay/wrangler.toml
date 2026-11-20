@@ -1,0 +1,16 @@
+name = "charon-contact"
+main = "worker.mjs"
+compatibility_date = "2025-09-01"
+workers_dev = true
+[observability]
+enabled = false
+[vars]
+SITE_ORIGIN = "https://dimacharon.github.io"
+[[ratelimits]]
+name = "VISITOR_LIMIT"
+namespace_id = "41071"
+simple = { limit = 3, period = 60 }
+[[ratelimits]]
+name = "INBOX_LIMIT"
+namespace_id = "41072"
+simple = { limit = 18, period = 60 }

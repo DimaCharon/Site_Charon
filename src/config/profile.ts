@@ -12,10 +12,16 @@ Object.freeze(publishedProfile.contacts);
 Object.freeze(publishedProfile);
 export type Preferences = {
   theme: "dark" | "light";
+  snow: boolean;
   cursor: boolean;
   motion: boolean;
 };
-const defaultPrefs: Preferences = { theme: "dark", cursor: true, motion: true };
+const defaultPrefs: Preferences = {
+  theme: "dark",
+  cursor: true,
+  motion: true,
+  snow: false,
+};
 function read(key: string): unknown {
   try {
     return JSON.parse(localStorage.getItem(key) || "null");
@@ -42,6 +48,7 @@ export function usePreferences() {
     const p = read("charon.ui.v2") as Partial<Preferences> | null;
     return {
       theme: p?.theme === "light" ? "light" : "dark",
+      snow: p?.snow === true,
       cursor: typeof p?.cursor === "boolean" ? p.cursor : defaultPrefs.cursor,
       motion: typeof p?.motion === "boolean" ? p.motion : defaultPrefs.motion,
     };

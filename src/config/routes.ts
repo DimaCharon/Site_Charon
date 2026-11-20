@@ -9,7 +9,7 @@ export function readRoute(): string {
   if (typeof document === "undefined") return serverRoute;
   if (__CHARON_OFFLINE__) {
     return location.hash.startsWith("#/")
-      ? location.hash.slice(2).split("@")[0].replace(/\/+$/, "")
+      ? location.hash.slice(2).split(/[?@]/)[0].replace(/\/+$/, "")
       : "";
   }
   const baked = document.documentElement.dataset.route;
@@ -42,4 +42,18 @@ export function pageHref(path = "", anchor = "") {
 }
 export function assetUrl(path: string) {
   return __CHARON_ASSETS__[path] || rootPrefix() + path;
+}
+
+export function briefHref(reference?: string) {
+  return (
+    pageHref("contacts") +
+    (reference ? "?ref=" + encodeURIComponent(reference) : "")
+  );
+}
+export function readBriefReference() {
+  if (typeof location === "undefined") return "";
+  const q = __CHARON_OFFLINE__
+    ? location.hash.split("?")[1]?.split("@")[0] || ""
+    : location.search;
+  return new URLSearchParams(q).get("ref") || "";
 }

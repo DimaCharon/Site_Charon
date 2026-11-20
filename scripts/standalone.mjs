@@ -11,6 +11,8 @@ const { profile, content, media: inlineMedia } = loadPublished("public", true);
 const hasMascot = existsSync("public/models/charon.glb");
 const embedded = {};
 for (const [name, mime] of [
+  ["references/identity.webp", "image/webp"],
+  ["references/atlas.webp", "image/webp"],
   ["art/identity.webp", "image/webp"],
   ["art/studio-lut.png", "image/png"],
   ["art/brushed.webp", "image/webp"],
@@ -27,6 +29,7 @@ const result = await build({
   base: "./",
   define: {
     __CHARON_OFFLINE__: "true",
+    __CHARON_CONTACT_ENDPOINT__: JSON.stringify(""),
     __CHARON_ASSETS__: JSON.stringify(embedded),
     __CHARON_CONTENT__: JSON.stringify(content),
     __CHARON_MEDIA__: JSON.stringify(inlineMedia),

@@ -9,7 +9,7 @@ import {
   Github,
   Globe2,
 } from "lucide-react";
-import { SectionLabel, Mark } from "./ui";
+import { Mark } from "./ui";
 import {
   contactNames,
   safeContact,
@@ -17,80 +17,36 @@ import {
   type ContactKey,
 } from "../config/profile";
 const icons = { telegram: Send, email: Mail, github: Github, social: Globe2 };
-export function Contacts({ profile }: { profile: Profile }) {
-  const channels = (Object.keys(contactNames) as ContactKey[])
+export function PublishedChannels({ profile }: { profile: Profile }) {
+  const items = (Object.keys(contactNames) as ContactKey[])
     .map((key) => ({ key, href: safeContact(key, profile.contacts[key]) }))
     .filter((c): c is { key: ContactKey; href: string } => c.href !== null);
-  return (
-    <section
-      id="contacts"
-      className="contacts-section section"
-      aria-labelledby="contacts-title"
-    >
-      <div className="contact-watermark" aria-hidden="true">
-        <Mark />
+  return items.length ? (
+    <aside className="direct-desk">
+      <span className="folio-code">{copy["contacts.text02"]}</span>
+      <div className="contact-channels">
+        {items.map(({ key, href }) => {
+          const Icon = icons[key];
+          return (
+            <a
+              className="contact-channel"
+              href={href}
+              key={key}
+              target={key === "email" ? undefined : "_blank"}
+              rel="noopener noreferrer"
+            >
+              <Icon size={16} />
+              <div>
+                <strong>{copy["contacts." + key]}</strong>
+                <span>{profile.contacts[key].replace(/^https?:\/\//, "")}</span>
+              </div>
+              <ArrowUpRight size={14} />
+            </a>
+          );
+        })}
       </div>
-      <div className="shell">
-        <SectionLabel num={copy["contacts.number"]}>
-          {copy["contacts.text01"]}
-        </SectionLabel>
-        <div className="contact-heading reveal">
-          <h2 id="contacts-title">
-            {copy["contacts.title1"]}{" "}
-            <span className="accent">{copy["contacts.title2"]}</span>
-          </h2>
-          {!channels.length && (
-            <div className="folio-code contact-state">
-              {copy["contacts.unset"]}
-            </div>
-          )}
-          <p>
-            {channels.length ? (
-              <>
-                {copy["contacts.intro1"]}
-                <br className="wide-br" /> {copy["contacts.intro2"]}
-              </>
-            ) : (
-              copy["contacts.text03"]
-            )}
-          </p>
-        </div>
-        {channels.length ? (
-          <>
-            <div className="contact-channels">
-              {channels.map(({ key, href }) => {
-                const Icon = icons[key];
-                return (
-                  <a
-                    key={key}
-                    className="contact-channel"
-                    href={href}
-                    target={key === "email" ? undefined : "_blank"}
-                    rel="noopener noreferrer"
-                  >
-                    <Icon size={20} strokeWidth={1.4} />
-                    <div>
-                      <strong>{copy["contacts." + key]}</strong>
-                      <span>
-                        {profile.contacts[key].replace(/^https?:\/\//, "")}
-                      </span>
-                    </div>
-                    <ArrowUpRight size={15} />
-                  </a>
-                );
-              })}
-            </div>
-            <div className="contact-note">{copy["contacts.text02"]}</div>
-          </>
-        ) : (
-          <a className="folio-inline" href={pageHref("products")}>
-            {copy["store.toProducts"]}
-            <ArrowUpRight size={15} />
-          </a>
-        )}
-      </div>
-    </section>
-  );
+    </aside>
+  ) : null;
 }
 export function Footer({ onOwner }: { onOwner: () => void }) {
   const taps = useRef<number[]>([]);
@@ -119,6 +75,8 @@ export function Footer({ onOwner }: { onOwner: () => void }) {
         <nav aria-label={copy["store.shelf"]}>
           {[
             ["products", "store.catalog"],
+            ["references", "refs.title"],
+            ["contacts", "nav.contacts"],
             ["lab", "lab.title"],
             ["journal", "library.notes"],
             ["guide", "library.guide"],

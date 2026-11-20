@@ -90,6 +90,26 @@ export function Settings({
             onChange={() => setPrefs((p) => ({ ...p, cursor: !p.cursor }))}
           />
         </div>
+        <div className="setting-row">
+          <div>
+            <h3>{copy["settings.snow"]}</h3>
+            <p>
+              {
+                copy[
+                  systemReduce || !prefs.motion
+                    ? "settings.snowQuiet"
+                    : "settings.snowHint"
+                ]
+              }
+            </p>
+          </div>
+          <Switch
+            label={copy["settings.snow"]}
+            value={prefs.snow && prefs.motion && !systemReduce}
+            disabled={systemReduce || !prefs.motion}
+            onChange={() => setPrefs((p) => ({ ...p, snow: !p.snow }))}
+          />
+        </div>
         <p className="local-note">
           <span className="status-dot" />
           {copy["settings.text12"]}

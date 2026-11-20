@@ -365,7 +365,7 @@ export function Manual({ updates = false }: { updates?: boolean }) {
         description={w[updates ? "library.updatesIntro" : "library.guideIntro"]}
       />
       <div className="manual-rows">
-        {[1, 2, 3].map((i) => (
+        {(updates ? [1, 2, 3, 4] : [1, 2, 3]).map((i) => (
           <section key={i}>
             <span className="folio-code">
               {updates ? w["library.version" + i] : pad(i)}

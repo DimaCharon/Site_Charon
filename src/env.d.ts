@@ -8,3 +8,5 @@ declare const __CHARON_MEDIA__: Record<string, string>;
 
 declare const __CHARON_ASSETS__: Record<string, string>;
 declare const __CHARON_OFFLINE__: boolean;
+
+declare const __CHARON_CONTACT_ENDPOINT__: string;

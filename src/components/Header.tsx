@@ -1,31 +1,32 @@
 import { pageHref, readRoute } from "../config/routes";
-import { publishedProfile } from "../config/profile";
 import { copy } from "../config/site";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUpRight, SlidersHorizontal, Menu } from "lucide-react";
 import { navigation } from "../config/site";
 import { Mark, Modal } from "./ui";
 export function Header({ onSettings }: { onSettings: () => void }) {
-  const path = readRoute(),
-    pinned = path.startsWith("journal")
-      ? "interests"
+  const path = readRoute();
+  const pinned = path.startsWith("journal")
+    ? "interests"
+    : path === "contacts" || path === "references"
+      ? path
       : path.startsWith("products") || path === "lab"
         ? "projects"
         : path
           ? "other"
           : "";
-  const canContact = Object.values(publishedProfile.contacts).some(Boolean);
-  const quick = canContact
-    ? { link: pageHref("", "contacts"), label: copy["nav.contact"] }
-    : path === "lab"
-      ? { link: pageHref("products"), label: copy["store.catalogLink"] }
-      : { link: pageHref("lab"), label: copy["lab.start"] };
+  const quick =
+    path === "contacts"
+      ? { link: pageHref("lab"), label: copy["lab.start"] }
+      : { link: pageHref("contacts"), label: copy["nav.contact"] };
   const navHref = (id: string) =>
-    id === "interests"
-      ? pageHref("journal")
-      : id === "projects" && path
-        ? pageHref("products")
-        : pageHref("", id);
+    id === "contacts" || id === "references"
+      ? pageHref(id)
+      : id === "interests"
+        ? pageHref("journal")
+        : id === "projects" && path
+          ? pageHref("products")
+          : pageHref("", id);
   const [current, setCurrent] = useState(pinned || "home"),
     [mobile, setMobile] = useState(false);
   const nav = useRef<HTMLElement>(null);
@@ -36,14 +37,7 @@ export function Header({ onSettings }: { onSettings: () => void }) {
     const run = () => {
       raf = 0;
       let active = "home";
-      for (const id of [
-        "home",
-        "projects",
-        "about",
-        "world",
-        "interests",
-        "contacts",
-      ]) {
+      for (const id of ["home", "projects", "about"]) {
         const e = document.getElementById(id);
         if (
           e &&
@@ -52,8 +46,8 @@ export function Header({ onSettings }: { onSettings: () => void }) {
           active = id;
       }
       if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4)
-        active = "contacts";
-      setCurrent(active === "world" ? "interests" : active);
+        active = "about";
+      setCurrent(active);
     };
     const scroll = () => {
       if (!raf) raf = requestAnimationFrame(run);

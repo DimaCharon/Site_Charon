@@ -13,6 +13,8 @@ const groups: Record<string, string> = {
   world: "Цифровой мир и орбиты",
   interests: "Интересы и заметки",
   contacts: "Контакты",
+  brief: "Форма заявки",
+  refs: "Референсы продуктов",
   footer: "Подвал страницы",
   studio: "3D-студия",
   settings: "Настройки оформления",

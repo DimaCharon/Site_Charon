@@ -192,9 +192,10 @@ test("Мобильное меню, компоновка 320–1920 px, отсу�
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByRole("button", { name: words["nav.text03"] }).click();
-  await page.getByRole("dialog").locator('nav a[href="#contacts"]').click();
-  await expect(page).toHaveURL(/#contacts$/);
+  await page.getByRole("dialog").locator('nav a[href="./contacts/"]').click();
+  await expect(page).toHaveURL(/\/contacts\/$/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.goto("/");
   for (const width of [
     320, 360, 390, 430, 640, 768, 900, 1024, 1280, 1440, 1920,
   ]) {
@@ -311,6 +312,7 @@ test("Пять нажатий, пароль и изолированный чер
   await expect(page.locator(".id-name")).toHaveText(publicIdentity.name);
   await page.reload();
   await expect(page.locator(".id-name")).toHaveText(publicIdentity.name);
+  await page.goto("/contacts/");
   await expect(page.locator("a.contact-channel")).toHaveCount(
     Object.values(publicIdentity.contacts).filter(Boolean).length,
   );
@@ -369,6 +371,11 @@ test("На сенсорном экране работают настоящие �
   await page.goto("http://127.0.0.1:4173/");
   const cdp = await context.newCDPSession(page);
   const swipe = async (sel: string) => {
+    // Gesture handlers belong to the mounted client, not the earlier static HTML.
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-motion",
+      "reduced",
+    );
     const el = page.locator(sel).first();
     await el.scrollIntoViewIfNeeded();
     const r = (await el.boundingBox())!;
@@ -395,6 +402,7 @@ test("На сенсорном экране работают настоящие �
       .toBeGreaterThan(100);
   }
   await page.locator('.footer-directory a[href="./journal/"]').tap();
+  await expect(page).toHaveURL(/\/journal\/$/);
   await swipe(".interest-wall");
   await expect
     .poll(() => page.locator(".interest-wall").evaluate((e) => e.scrollLeft))

@@ -1,0 +1,536 @@
+/* Correspondence / reference room: paper-like sheets in the existing studio. */
+.brief-desk {
+  padding-block: clamp(22px, 3.3vw, 55px) clamp(48px, 6.5vw, 110px);
+}
+.brief-desk > .folio-back {
+  margin-bottom: 14px;
+}
+.brief-intro {
+  text-align: center;
+  max-width: 740px;
+  margin: 0 auto clamp(23px, 3.3vw, 48px);
+}
+.brief-intro h1 {
+  font-size: clamp(45px, 6.6vw, 108px);
+  font-weight: 530;
+  letter-spacing: -0.067em;
+  line-height: 1.07;
+  margin: 10px 0 14px;
+  overflow-wrap: anywhere;
+}
+.brief-intro em {
+  color: var(--accent);
+  font: italic 400 1.03em/1 var(--display);
+  font-synthesis: style;
+}
+.brief-intro p {
+  color: var(--muted);
+  max-width: 55ch;
+  margin: auto;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+.brief-paper,
+.direct-desk {
+  max-width: 720px;
+  margin: auto;
+  min-width: 0;
+}
+.brief-paper {
+  padding: clamp(18px, 3vw, 39px);
+  border: 1px solid var(--sheet-rule);
+  border-top: 3px solid var(--accent);
+  background: var(--panel);
+  border-radius: 5px;
+}
+.paper-bar,
+.desk-state,
+.paper-bar h2,
+.brief-submit,
+.brief-save,
+.reference-line,
+.reference-line a,
+.sent-seal,
+.like-link {
+  display: flex;
+  align-items: center;
+}
+.paper-bar,
+.reference-line {
+  justify-content: space-between;
+  gap: 12px;
+}
+.paper-bar {
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.paper-bar h2 {
+  gap: 9px;
+  font-size: clamp(20px, 2.1vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -0.045em;
+  font-weight: 550;
+}
+.paper-bar h2 svg {
+  color: var(--accent);
+}
+.desk-state {
+  gap: 5px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.desk-state i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--soft);
+}
+.desk-state.connected i {
+  background: var(--green);
+}
+.delivery-info {
+  padding: 9px 12px;
+  background: var(--accent-tint);
+  border-left: 2px solid var(--accent);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+.brief-fields {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  border: 0;
+}
+.brief-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.brief-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.brief-field label {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.brief-field label small {
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--muted);
+}
+.brief-field :is(input, textarea, select) {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--sheet-rule);
+  border-radius: 4px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  font:
+    400 15px/1.5 Manrope,
+    Arial,
+    sans-serif;
+  min-height: 43px;
+  padding: 10px 12px;
+}
+.brief-field textarea {
+  resize: vertical;
+}
+.brief-field ::placeholder {
+  color: var(--soft);
+  opacity: 1;
+}
+.brief-field :is(input, textarea, select):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.brief-field [aria-invalid="true"] {
+  border-color: var(--accent);
+}
+.field-problem {
+  color: var(--accent);
+  font-size: 12px;
+}
+.reference-line a {
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.brief-consent label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.brief-consent input {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent);
+  margin: 2px 0;
+}
+.brief-consent p {
+  padding-left: 25px;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 5px 0 0;
+}
+.brief-submit {
+  border-top: 1px solid var(--line);
+  margin-top: 21px;
+  padding-top: 16px;
+  justify-content: space-between;
+  gap: 8px 15px;
+  flex-wrap: wrap;
+}
+.brief-submit .primary {
+  border-radius: 30px;
+  min-height: 43px;
+}
+.brief-submit button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.brief-save {
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  min-height: 40px;
+}
+.brief-status:not(:empty) {
+  margin-top: 12px;
+  color: var(--text);
+  font-size: 13px;
+}
+.sent-paper {
+  text-align: center;
+  padding-block: 42px;
+}
+.sent-seal {
+  width: 46px;
+  height: 46px;
+  justify-content: center;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+.sent-paper h2 {
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+.sent-paper p {
+  margin: 10px auto 20px;
+  color: var(--muted);
+  max-width: 45ch;
+}
+.direct-desk {
+  margin: 24px auto 0;
+}
+.direct-desk .contact-channels {
+  margin-top: 7px;
+}
+.room-index {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  margin-bottom: 16px;
+  border-block: 1px solid var(--line);
+}
+.ref-wall {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 30px);
+}
+.ref-sheet {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+}
+.ref-sheet.lead-ref {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.85fr);
+  align-items: stretch;
+}
+.ref-visual {
+  display: block;
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--bg-deep);
+  aspect-ratio: 2/1;
+  border-bottom: 1px solid var(--line);
+}
+.ref-visual img,
+.ref-visual .product-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.lead-ref .ref-visual {
+  height: 100%;
+  min-height: 250px;
+  aspect-ratio: 1.9;
+  border-bottom: 0;
+  border-right: 1px solid var(--line);
+  background: #cfcbd6;
+}
+.ref-identity-object {
+  background: #d9d6de;
+}
+.ref-orbit-atlas {
+  background: #16171b;
+}
+.ref-code {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #1f1f27e8;
+  border: 1px solid #aea8b5;
+  color: white;
+  line-height: 1.45;
+  letter-spacing: 0.13em;
+  padding: 3px 7px;
+  font-size: 8px;
+  border-radius: 2px;
+}
+.ref-description {
+  padding: clamp(16px, 2.3vw, 36px);
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.lead-ref .ref-description {
+  align-self: center;
+}
+.ref-description h2 {
+  font-size: clamp(25px, 2.8vw, 47px);
+  line-height: 1.1;
+  letter-spacing: -0.055em;
+  font-weight: 530;
+  margin: 9px 0;
+}
+.ref-description p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 56ch;
+}
+.ref-credit {
+  font: 9px/1.6 var(--mono);
+  color: var(--soft);
+  margin: 12px 0;
+}
+.ref-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px 20px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 9px;
+}
+.like-link {
+  gap: 8px;
+  min-height: 35px;
+  padding: 5px 13px;
+  color: var(--text);
+  border: 1px solid var(--sheet-rule);
+  border-radius: 22px;
+  font-size: 12px;
+}
+.like-link:hover,
+.brief-save:hover,
+.reference-line a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+/* Quiet and decorative: only instantiated by explicit opt-in. */
+.snow-film {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none !important;
+  overflow: hidden;
+  color: #fff;
+  user-select: none;
+  contain: strict;
+}
+.snow-film * {
+  pointer-events: none !important;
+}
+.snow-dust i {
+  position: absolute;
+  top: -8px;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  background: #fff;
+  border-radius: 50%;
+  opacity: var(--alpha);
+  animation: desk-fall var(--fall) linear var(--phase) infinite;
+}
+.snow-crystal {
+  position: absolute;
+  top: 0;
+  left: 78%;
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  animation: desk-crystal 39s linear -3s infinite;
+}
+.snow-film[data-paused="true"] * {
+  animation-play-state: paused;
+}
+.snow-film svg {
+  display: block;
+}
+.brief-desk:focus-within ~ .snow-film,
+body:has(.brief-paper:focus-within) .snow-film {
+  visibility: hidden;
+}
+:root[data-theme="light"] .snow-dust i,
+:root[data-theme="light"] .snow-crystal {
+  filter: drop-shadow(0 1px 1px #37313f99);
+}
+@keyframes desk-fall {
+  0% {
+    transform: translate3d(0, -2vh, 0);
+  }
+  48% {
+    transform: translate3d(var(--wind), 49vh, 0);
+  }
+  100% {
+    transform: translate3d(5px, 104vh, 0);
+  }
+}
+@keyframes desk-crystal {
+  0%,
+  53% {
+    opacity: 0;
+    transform: translate3d(0, -3vh, 0) rotate(0deg);
+  }
+  55% {
+    opacity: 0.46;
+  }
+  82% {
+    opacity: 0.36;
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: translate3d(-48px, 103vh, 0) rotate(110deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .snow-film {
+    display: none !important;
+  }
+}
+@media (max-width: 960px) and (min-width: 721px) {
+  .header .contact-nav {
+    display: none;
+  }
+  .header .desktop-nav a {
+    padding-inline: 7px;
+  }
+  .header-inner {
+    gap: 8px;
+  }
+}
+@media (max-width: 720px) {
+  .brief-intro {
+    margin: 9px auto 19px;
+  }
+  .brief-intro p {
+    font-size: 14px;
+  }
+  .brief-intro h1 {
+    margin: 11px 0;
+  }
+  .brief-pair {
+    gap: 12px;
+  }
+  .brief-field :is(input, textarea, select) {
+    font-size: 16px;
+  }
+  .ref-wall,
+  .ref-sheet.lead-ref {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lead-ref .ref-visual {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 1.85;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .ref-visual {
+    aspect-ratio: 1.85;
+  }
+  .ref-description p {
+    font-size: 13px;
+  }
+  .ref-credit {
+    margin: 8px 0;
+  }
+  .ref-description h2 {
+    margin: 6px 0;
+  }
+  .snow-dust i:nth-child(n + 10) {
+    display: none;
+  }
+}
+@media (max-width: 485px) {
+  .brief-pair {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .brief-fields {
+    gap: 14px;
+  }
+  .brief-paper {
+    padding: 17px 15px;
+  }
+  .desk-state {
+    font-size: 9px;
+  }
+  .brief-submit {
+    gap: 1px 8px;
+  }
+  .brief-submit .primary {
+    font-size: 12px;
+    padding-inline: 13px;
+  }
+  .brief-save {
+    font-size: 11px;
+  }
+  .reference-line {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 3px 8px;
+  }
+}

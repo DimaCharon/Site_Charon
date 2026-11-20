@@ -19,6 +19,7 @@ export const { copy, projects, worlds, directions, interests } =
 export const navigation = [
   "home",
   "projects",
+  "references",
   "about",
   "interests",
   "contacts",
