@@ -368,7 +368,7 @@
   color: var(--accent);
   border-color: var(--accent);
 }
-/* Quiet and decorative: only instantiated by explicit opt-in. */
+/* Denser, layered snowfall: bounded particle count; animate transforms only on the grains. */
 .snow-film {
   position: fixed;
   inset: 0;
@@ -378,6 +378,7 @@
   color: #fff;
   user-select: none;
   contain: strict;
+  --grain-shadow: 0 0 2px #e4f1ff88;
 }
 .snow-film * {
   pointer-events: none !important;
@@ -390,6 +391,7 @@
   height: var(--size);
   background: #fff;
   border-radius: 50%;
+  box-shadow: var(--grain-shadow);
   opacity: var(--alpha);
   animation: desk-fall var(--fall) linear var(--phase) infinite;
 }
@@ -397,8 +399,8 @@
   position: absolute;
   top: 0;
   left: 78%;
-  width: 10px;
-  height: 10px;
+  width: 13px;
+  height: 13px;
   opacity: 0;
   animation: desk-crystal 39s linear -3s infinite;
 }
@@ -412,7 +414,9 @@
 body:has(.brief-paper:focus-within) .snow-film {
   visibility: hidden;
 }
-:root[data-theme="light"] .snow-dust i,
+:root[data-theme="light"] .snow-film {
+  --grain-shadow: 0 0 0 0.5px #6d78909c, 0 1px 2px #4e597a9c;
+}
 :root[data-theme="light"] .snow-crystal {
   filter: drop-shadow(0 1px 1px #37313f99);
 }
@@ -424,7 +428,7 @@ body:has(.brief-paper:focus-within) .snow-film {
     transform: translate3d(var(--wind), 49vh, 0);
   }
   100% {
-    transform: translate3d(5px, 104vh, 0);
+    transform: translate3d(var(--drift), 104vh, 0);
   }
 }
 @keyframes desk-crystal {
@@ -434,10 +438,10 @@ body:has(.brief-paper:focus-within) .snow-film {
     transform: translate3d(0, -3vh, 0) rotate(0deg);
   }
   55% {
-    opacity: 0.46;
+    opacity: 0.8;
   }
   82% {
-    opacity: 0.36;
+    opacity: 0.64;
   }
   88%,
   100% {
@@ -448,6 +452,11 @@ body:has(.brief-paper:focus-within) .snow-film {
 @media (prefers-reduced-motion: reduce) {
   .snow-film {
     display: none !important;
+  }
+}
+@media (max-width: 1100px) {
+  .snow-dust i:nth-child(n + 55) {
+    display: none;
   }
 }
 @media (max-width: 960px) and (min-width: 721px) {
@@ -500,7 +509,7 @@ body:has(.brief-paper:focus-within) .snow-film {
   .ref-description h2 {
     margin: 6px 0;
   }
-  .snow-dust i:nth-child(n + 10) {
+  .snow-dust i:nth-child(n + 37) {
     display: none;
   }
 }

@@ -1,19 +1,38 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Snowflake } from "lucide-react";
-// Compositor-only transforms. No animation loop, no allocation on pointer/scroll events.
-const seeds = Array.from(
-  { length: 17 },
-  (_, i) =>
-    ({
-      "--x": `${(i * 43 + 3) % 101}%`,
-      "--wind": `${(i % 2 ? -1 : 1) * (12 + (i % 31))}px`,
-      "--size": (i % 4 === 0 ? 2.5 : i % 3 === 0 ? 2 : 1.5) + "px",
-      "--alpha": String(0.17 + (i % 4) * 0.055),
-      "--fall": 20 + ((i * 7) % 15) + "s",
-      "--phase": -((i * 8.31 + 4) % 31) + "s",
-    }) as CSSProperties,
-);
+// A deterministic field with distant, middle and foreground grains. Every prefix
+// covers the viewport, so shrinking to a tablet or phone doesn't leave an empty side.
+const layers = [
+  { size: 1.8, alpha: 0.42, fall: 23 },
+  { size: 2.7, alpha: 0.6, fall: 18 },
+  { size: 3.8, alpha: 0.78, fall: 14 },
+] as const;
+function makeField(): CSSProperties[] {
+  let seed = 7319;
+  const random = () => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  const depths = [0, 1, 0, 2, 1];
+  return Array.from({ length: 84 }, (_, i) => {
+    const layer = layers[depths[i % depths.length]],
+      fall = layer.fall + random() * 6,
+      start = (0.37 + i * 0.56984 + random() * 0.035) % 1,
+      direction = random() < 0.5 ? -1 : 1;
+    return {
+      "--x": ((2 + i * 75.4878 + random() * 2.2) % 100).toFixed(2) + "%",
+      "--wind": (direction * (9 + random() * 28)).toFixed(1) + "px",
+      "--drift": (direction * (2 + random() * 12)).toFixed(1) + "px",
+      "--size": (layer.size + random() * 0.8).toFixed(2) + "px",
+      "--alpha": (layer.alpha + random() * 0.13).toFixed(2),
+      "--fall": fall.toFixed(2) + "s",
+      "--phase": (-start * fall).toFixed(2) + "s",
+    } as CSSProperties;
+  });
+}
 export function Snow() {
+  // No particles (or field allocation) until enabled, and no JS animation loop.
+  const [seeds] = useState(makeField);
   const [paused, setPaused] = useState(
     () => typeof document !== "undefined" && document.hidden,
   );
@@ -30,7 +49,7 @@ export function Snow() {
         ))}
       </div>
       <span className="snow-crystal">
-        <Snowflake size={10} strokeWidth={1.2} />
+        <Snowflake size={13} strokeWidth={1.55} />
       </span>
     </div>
   );

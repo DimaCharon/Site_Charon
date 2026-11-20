@@ -81,12 +81,28 @@ test("Снег: выключен по умолчанию, запоминает �
   await expect(snow).toHaveCount(1);
   await expect(snow).toHaveCSS("pointer-events", "none");
   await expect(snow.locator(".snow-crystal svg")).toHaveCount(1);
+  const grains = snow.locator(".snow-dust i:visible");
+  await expect(grains).toHaveCount(84);
+  const near = await grains.evaluateAll(
+    (nodes) =>
+      nodes.filter((n) => {
+        const css = getComputedStyle(n);
+        return parseFloat(css.width) >= 3.8 && parseFloat(css.opacity) >= 0.78;
+      }).length,
+  );
+  expect(near).toBeGreaterThan(10);
   await page.locator('[data-reference="orbit-atlas"]').click();
   await expect(snow).toHaveCount(1);
   await page.reload();
   await expect(snow).toHaveCount(1);
+  await page.setViewportSize({ width: 900, height: 900 });
+  await expect(grains).toHaveCount(54);
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(snow.locator(".snow-dust i:visible")).toHaveCount(9);
+  await expect(grains).toHaveCount(36);
+  await page.locator("#brief-name").focus();
+  await expect(snow).toHaveCSS("visibility", "hidden");
+  await page.locator("#brief-name").blur();
+  await expect(snow).toHaveCSS("visibility", "visible");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(snow).toHaveCount(0);
   await settings.click();
