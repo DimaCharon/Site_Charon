@@ -1,3 +1,4 @@
+import { assetUrl } from "../config/routes";
 import { copy } from "../config/site";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { Art } from "../config/site";
@@ -229,7 +230,7 @@ export function GenerativeArt({
       <div className={"identity-art " + className}>
         <span className="identity-art-orbit" />
         <img
-          src={`${import.meta.env.BASE_URL}art/identity.webp`}
+          src={assetUrl("art/identity.webp")}
           width="900"
           height="680"
           alt={copy["studio.text31"]}
@@ -281,22 +282,24 @@ export function GenerativeArt({
 export function Fingerprint() {
   const lines = useMemo(
     () =>
-      Array.from({ length: 40 }, (_, i) => {
-        const r = 0.18 + i * 0.032;
-        return line(
-          Array.from({ length: 135 }, (_, j) => {
-            const a = (j / 134) * TAU * (0.89 + 0.1 * Math.sin(i * 0.125));
-            const s =
-              r *
-              (1 +
-                0.1 * Math.sin(a * 3 + r * 1.9) +
-                0.075 * Math.cos(a * 2 - r * 2));
-            const x = Math.cos(a) * s * 37,
-              y = Math.sin(a) * s * 58;
-            return [83 + x * 0.86 - y * 0.41, 95 + x * 0.41 + y * 0.86];
+      typeof document === "undefined"
+        ? []
+        : Array.from({ length: 40 }, (_, i) => {
+            const r = 0.18 + i * 0.032;
+            return line(
+              Array.from({ length: 135 }, (_, j) => {
+                const a = (j / 134) * TAU * (0.89 + 0.1 * Math.sin(i * 0.125));
+                const s =
+                  r *
+                  (1 +
+                    0.1 * Math.sin(a * 3 + r * 1.9) +
+                    0.075 * Math.cos(a * 2 - r * 2));
+                const x = Math.cos(a) * s * 37,
+                  y = Math.sin(a) * s * 58;
+                return [83 + x * 0.86 - y * 0.41, 95 + x * 0.41 + y * 0.86];
+              }),
+            );
           }),
-        );
-      }),
     [],
   );
   return (

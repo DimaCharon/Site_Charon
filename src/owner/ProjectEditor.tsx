@@ -1,3 +1,4 @@
+import { blankOffer } from "../../shared/offer.mjs";
 import { useRef, useState, useEffect } from "react";
 import {
   Plus,
@@ -41,6 +42,7 @@ const finishes = {
 const sample = (id: string): Project => ({
   id,
   name: "Новый проект",
+  offer: blankOffer(),
   caption: "",
   category: "",
   status: "Концепция",
@@ -287,6 +289,127 @@ export function ProjectEditor({
                   onChange={(category) => edit(p.id, { category })}
                 />
               </div>
+              <details className="cms-disclosure offer-config">
+                <summary>Демо, цена и продажа</summary>
+                <div>
+                  <Field
+                    label="Для кого продукт"
+                    value={p.offer.audience}
+                    max={400}
+                    multi
+                    onChange={(v) =>
+                      edit(p.id, { offer: { ...p.offer, audience: v } })
+                    }
+                  />
+                  <Field
+                    label="Что получит посетитель"
+                    value={p.offer.result}
+                    max={900}
+                    multi
+                    onChange={(v) =>
+                      edit(p.id, { offer: { ...p.offer, result: v } })
+                    }
+                  />
+                  <Select
+                    label="Способ продажи"
+                    value={p.offer.sale}
+                    onChange={(v) =>
+                      edit(p.id, {
+                        offer: {
+                          ...p.offer,
+                          sale: v as Project["offer"]["sale"],
+                          ...(v === "showcase"
+                            ? { price: "", terms: "", buyUrl: "" }
+                            : v === "inquiry"
+                              ? { buyUrl: "" }
+                              : {}),
+                        },
+                      })
+                    }
+                  >
+                    <option value="showcase">
+                      Только витрина — без продажи
+                    </option>
+                    <option value="inquiry">
+                      По запросу через контакты профиля
+                    </option>
+                    <option value="checkout">
+                      Покупка на внешней странице
+                    </option>
+                  </Select>
+                  {p.offer.sale !== "showcase" && (
+                    <>
+                      <Field
+                        label="Цена и валюта"
+                        value={p.offer.price}
+                        max={90}
+                        hint="Для покупки обязательна. Укажите полную цену и период, если это подписка."
+                        onChange={(v) =>
+                          edit(p.id, { offer: { ...p.offer, price: v } })
+                        }
+                      />
+                      {p.offer.sale === "checkout" && (
+                        <Field
+                          label="HTTPS-ссылка покупки"
+                          value={p.offer.buyUrl}
+                          max={1200}
+                          type="url"
+                          hint="Используйте свою действующую страницу оплаты. Для покупки статус проекта должен быть активным."
+                          onChange={(v) =>
+                            edit(p.id, { offer: { ...p.offer, buyUrl: v } })
+                          }
+                        />
+                      )}
+                      <Field
+                        label="Условия доступа"
+                        value={p.offer.terms}
+                        max={800}
+                        multi
+                        onChange={(v) =>
+                          edit(p.id, { offer: { ...p.offer, terms: v } })
+                        }
+                      />
+                    </>
+                  )}
+                  <Select
+                    label="Демонстрация"
+                    value={p.offer.demo}
+                    onChange={(v) =>
+                      edit(p.id, {
+                        offer: {
+                          ...p.offer,
+                          demo: v as Project["offer"]["demo"],
+                          ...(v !== "link" ? { demoUrl: "" } : {}),
+                        },
+                      })
+                    }
+                  >
+                    <option value="none">Нет демо</option>
+                    <option value="lab">Встроенная студия обложек</option>
+                    <option value="link">Своя HTTPS-ссылка</option>
+                  </Select>
+                  {p.offer.demo === "link" && (
+                    <Field
+                      label="HTTPS-ссылка демо"
+                      value={p.offer.demoUrl}
+                      max={1200}
+                      type="url"
+                      onChange={(v) =>
+                        edit(p.id, { offer: { ...p.offer, demoUrl: v } })
+                      }
+                    />
+                  )}
+                  <Field
+                    label="Документация продукта (HTTPS, необязательно)"
+                    value={p.offer.docsUrl}
+                    max={1200}
+                    type="url"
+                    onChange={(v) =>
+                      edit(p.id, { offer: { ...p.offer, docsUrl: v } })
+                    }
+                  />
+                </div>
+              </details>
               <section className="cover-editor">
                 <div className="cms-line">
                   <strong>Обложка</strong>

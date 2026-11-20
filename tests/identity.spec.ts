@@ -130,6 +130,7 @@ test("Профиль, интерактивные направления, сем�
   await expect(
     page.getByRole("tab", { name: dirs[2].title, exact: true }),
   ).toHaveAttribute("aria-selected", "true");
+  await page.locator('.desktop-nav a[data-nav="interests"]').click();
   const nodes = page.locator(".orbit-node");
   await expect(nodes).toHaveCount(7);
   for (let i = 0; i < 7; i++) {
@@ -345,6 +346,7 @@ test("Мышью листаются галерея, досье, направле
     "aria-selected",
     "true",
   );
+  await page.goto("/journal/");
   await drag(page, ".atlas-stage", -115);
   await expect(page.locator(".inspector-content h3")).toHaveText(
     orbits[1].title,
@@ -392,6 +394,7 @@ test("На сенсорном экране работают настоящие �
       .poll(() => page.locator(".project-rail").evaluate((e) => e.scrollLeft))
       .toBeGreaterThan(100);
   }
+  await page.locator('.footer-directory a[href="./journal/"]').tap();
   await swipe(".interest-wall");
   await expect
     .poll(() => page.locator(".interest-wall").evaluate((e) => e.scrollLeft))

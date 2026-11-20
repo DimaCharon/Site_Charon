@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://dimacharon.github.io/Site_Charon/sitemap.xml

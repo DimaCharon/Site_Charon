@@ -7,7 +7,10 @@ import {
   canonicalProfile,
   normalizeProfile,
 } from "../shared/profile-schema.mjs";
-import { canonicalDocument } from "../shared/content-schema.mjs";
+import {
+  canonicalDocument,
+  normalizeDocument,
+} from "../shared/content-schema.mjs";
 import {
   patchedDocument,
   INLINE_LIMIT,
@@ -127,14 +130,14 @@ export async function applyEdition({
   checkOnly,
 }) {
   const document = packet.startsWith("CH1.")
-    ? {
+    ? normalizeDocument({
         ...current,
         profile: verifyRequest({
           ...request,
           packet,
           current: current.profile,
         }),
-      }
+      })
     : verifyEdition({ ...request, packet, current });
   const plan = await planMedia(join(root, "media"), current, document, images);
   const changed =

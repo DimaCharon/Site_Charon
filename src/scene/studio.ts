@@ -1,3 +1,4 @@
+import { assetUrl } from "../config/routes";
 import { copy } from "../config/site";
 import * as T from "three";
 
@@ -72,7 +73,7 @@ async function materials() {
     const image = new Image();
     image.onload = () => resolve(image);
     image.onerror = () => reject(new Error("Studio lighting unavailable"));
-    image.src = `${import.meta.env.BASE_URL}art/studio-lut.png`;
+    image.src = assetUrl("art/studio-lut.png");
   }).then((image) => {
     // The PNG stores log-encoded HDR radiance, not a display image. Preserve
     // the original CubeUV layout (including all roughness levels).
@@ -96,9 +97,7 @@ async function materials() {
   });
   const [lut, brush] = await Promise.all([
     studioData,
-    new T.TextureLoader().loadAsync(
-      `${import.meta.env.BASE_URL}art/brushed.webp`,
-    ),
+    new T.TextureLoader().loadAsync(assetUrl("art/brushed.webp")),
   ]);
   const env = new T.DataTexture(
     lut.data,
@@ -503,7 +502,7 @@ export async function createStudio(
     void import("three/addons/loaders/GLTFLoader.js")
       .then(async ({ GLTFLoader }) => {
         const gltf = await new GLTFLoader().loadAsync(
-          `${import.meta.env.BASE_URL}models/charon.glb`,
+          assetUrl("models/charon.glb"),
         );
         if (destroyed) {
           release(gltf.scene);

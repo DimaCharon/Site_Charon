@@ -17,7 +17,19 @@ export type Cover = {
   y: number;
 };
 export type Theme = "original" | "lavender" | "ice" | "steel";
+export type Offer = {
+  audience: string;
+  result: string;
+  sale: "showcase" | "inquiry" | "checkout";
+  price: string;
+  terms: string;
+  buyUrl: string;
+  demo: "none" | "lab" | "link";
+  demoUrl: string;
+  docsUrl: string;
+};
 export type Project = {
+  offer: Offer;
   id: string;
   name: string;
   caption: string;
@@ -48,7 +60,7 @@ export type Interest = {
   note: string;
 };
 export type Content = {
-  version: 1;
+  version: 2;
   copy: Record<string, string>;
   projects: Project[];
   directions: Direction[];

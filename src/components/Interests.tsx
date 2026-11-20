@@ -1,3 +1,4 @@
+import { pageHref } from "../config/routes";
 import { copy } from "../config/site";
 import { useRef } from "react";
 import { useRailDrag } from "../hooks/gestures";
@@ -28,10 +29,16 @@ export function Interests({ onOpen }: { onOpen: (i: number) => void }) {
       </div>
       <div ref={rail} className="interest-wall drag-rail">
         {interests.map((item, i) => (
-          <button
+          <a
+            href={pageHref("journal/" + item.kind)}
             key={item.kind}
             className={`interest-card interest-${item.kind} ${i < 3 ? "big" : "small"} reveal`}
-            onClick={() => onOpen(i)}
+            onClick={(e) => {
+              if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey) {
+                e.preventDefault();
+                onOpen(i);
+              }
+            }}
           >
             <span className="interest-top">
               <span className="mono">
@@ -51,7 +58,7 @@ export function Interests({ onOpen }: { onOpen: (i: number) => void }) {
               <h3>{item.title}</h3>
               <p>{item.text}</p>
             </div>
-          </button>
+          </a>
         ))}
       </div>
     </section>
@@ -82,6 +89,10 @@ export function InterestModal({
       <div className="sub-label mono">{copy["interests.text04"]}</div>
       <h3>{f.question}</h3>
       <p className="dossier-text">{f.note}</p>
+      <a className="folio-inline" href={pageHref("journal/" + f.kind)}>
+        {copy["library.read"]}
+        <ArrowUpRight size={15} />
+      </a>
       <div className="note-sign mono">{copy["interests.text05"]}</div>
     </Modal>
   );

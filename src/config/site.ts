@@ -1,3 +1,4 @@
+import { assetUrl } from "./routes";
 import type { Content, Cover, Project } from "../../shared/content-schema.mjs";
 export type {
   Field,
@@ -17,16 +18,15 @@ export const { copy, projects, worlds, directions, interests } =
   publishedContent;
 export const navigation = [
   "home",
-  "about",
   "projects",
+  "about",
   "interests",
   "contacts",
 ].map((id) => ({ id, label: copy["nav." + id] }));
 export function coverUrl(cover: Cover | null) {
   return !cover
     ? ""
-    : __CHARON_MEDIA__[cover.hash] ||
-        `${import.meta.env.BASE_URL}media/${cover.hash}.jpg`;
+    : __CHARON_MEDIA__[cover.hash] || assetUrl(`media/${cover.hash}.jpg`);
 }
 export function statusLabel(s: Project["status"], words = copy) {
   return words[

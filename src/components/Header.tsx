@@ -1,22 +1,45 @@
+import { pageHref, readRoute } from "../config/routes";
+import { publishedProfile } from "../config/profile";
 import { copy } from "../config/site";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUpRight, SlidersHorizontal, Menu } from "lucide-react";
 import { navigation } from "../config/site";
 import { Mark, Modal } from "./ui";
 export function Header({ onSettings }: { onSettings: () => void }) {
-  const [current, setCurrent] = useState("home"),
+  const path = readRoute(),
+    pinned = path.startsWith("journal")
+      ? "interests"
+      : path.startsWith("products") || path === "lab"
+        ? "projects"
+        : path
+          ? "other"
+          : "";
+  const canContact = Object.values(publishedProfile.contacts).some(Boolean);
+  const quick = canContact
+    ? { link: pageHref("", "contacts"), label: copy["nav.contact"] }
+    : path === "lab"
+      ? { link: pageHref("products"), label: copy["store.catalogLink"] }
+      : { link: pageHref("lab"), label: copy["lab.start"] };
+  const navHref = (id: string) =>
+    id === "interests"
+      ? pageHref("journal")
+      : id === "projects" && path
+        ? pageHref("products")
+        : pageHref("", id);
+  const [current, setCurrent] = useState(pinned || "home"),
     [mobile, setMobile] = useState(false);
   const nav = useRef<HTMLElement>(null);
   const [indicator, setIndicator] = useState({ width: 0, left: 0 });
   useEffect(() => {
+    if (pinned) return;
     let raf = 0;
     const run = () => {
       raf = 0;
       let active = "home";
       for (const id of [
         "home",
-        "about",
         "projects",
+        "about",
         "world",
         "interests",
         "contacts",
@@ -43,11 +66,11 @@ export function Header({ onSettings }: { onSettings: () => void }) {
       window.removeEventListener("scroll", scroll);
       window.removeEventListener("resize", scroll);
     };
-  }, []);
+  }, [pinned]);
   useLayoutEffect(() => {
     const el = nav.current;
     const move = () => {
-      const a = el?.querySelector<HTMLAnchorElement>(`[href="#${current}"]`);
+      const a = el?.querySelector<HTMLAnchorElement>(`[data-nav="${current}"]`);
       if (a) setIndicator({ width: a.offsetWidth, left: a.offsetLeft });
     };
     move();
@@ -60,9 +83,16 @@ export function Header({ onSettings }: { onSettings: () => void }) {
     <>
       <header className="header">
         <div className="shell header-inner">
-          <a className="brand" href="#home" aria-label={copy["nav.text01"]}>
+          <a
+            className="brand"
+            href={pageHref("", "home")}
+            aria-label={copy["nav.text01"]}
+          >
             <Mark />
             <span>{copy["nav.brand"]}</span>
+            <small className="masthead-stamp mono">
+              {copy["store.wordmark"]}
+            </small>
           </a>
           <nav
             className="desktop-nav"
@@ -78,7 +108,8 @@ export function Header({ onSettings }: { onSettings: () => void }) {
             />
             {navigation.map((link) => (
               <a
-                href={"#" + link.id}
+                data-nav={link.id}
+                href={navHref(link.id)}
                 key={link.id}
                 className={current === link.id ? "active" : ""}
                 aria-current={current === link.id ? "location" : undefined}
@@ -97,8 +128,8 @@ export function Header({ onSettings }: { onSettings: () => void }) {
             >
               <SlidersHorizontal size={17} strokeWidth={1.45} />
             </button>
-            <a className="contact-nav" href="#contacts">
-              {copy["nav.contact"]}
+            <a className="contact-nav" href={quick.link}>
+              {quick.label}
               <ArrowUpRight size={15} />
             </a>
             <button
@@ -121,7 +152,11 @@ export function Header({ onSettings }: { onSettings: () => void }) {
         >
           <nav aria-label={copy["nav.text06"]}>
             {navigation.map((n, i) => (
-              <a key={n.id} href={"#" + n.id} onClick={() => setMobile(false)}>
+              <a
+                key={n.id}
+                href={navHref(n.id)}
+                onClick={() => setMobile(false)}
+              >
                 <span className="mono">0{i + 1}</span>
                 {n.label}
                 <ArrowUpRight size={17} />

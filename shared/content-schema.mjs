@@ -1,3 +1,4 @@
+import { blankOffer, httpsLink } from "./offer.mjs";
 import { normalizeProfile } from "./profile-schema.mjs";
 import { textFields } from "./text-fields.mjs";
 export { textFields };
@@ -98,6 +99,34 @@ function cover(v) {
     y: pos(v.y),
   };
 }
+function offer(v, status) {
+  exact(v, Object.keys(blankOffer()), "формат предложения");
+  const link = (v, field) => {
+    const s = txt(v, 1200, field, true);
+    if (!s) return "";
+    const u = httpsLink(s);
+    if (!u) invalid(field + " (нужна HTTPS-ссылка без логина и пароля)");
+    return u;
+  };
+  const o = {
+    audience: txt(v.audience, 400, "аудиторию", true),
+    result: txt(v.result, 900, "результат", true),
+    sale: choice(v.sale, ["showcase", "inquiry", "checkout"], "способ продажи"),
+    price: txt(v.price, 90, "цену", true),
+    terms: txt(v.terms, 800, "условия", true),
+    buyUrl: link(v.buyUrl, "ссылку покупки"),
+    demo: choice(v.demo, ["none", "lab", "link"], "тип демо"),
+    demoUrl: link(v.demoUrl, "ссылку демо"),
+    docsUrl: link(v.docsUrl, "ссылку документации"),
+  };
+  if (
+    o.sale === "checkout" &&
+    (status !== "Активный проект" || !o.price || !o.buyUrl)
+  )
+    invalid("продажу: нужны активный проект, цена и ссылка на оплату");
+  if (o.demo === "link" && !o.demoUrl) invalid("ссылку для внешнего демо");
+  return o;
+}
 function project(p, i) {
   const hint = "проект №" + (i + 1);
   exact(
@@ -115,6 +144,7 @@ function project(p, i) {
       "cover",
       "theme",
       "caption",
+      "offer",
     ],
     hint,
   );
@@ -122,6 +152,7 @@ function project(p, i) {
     invalid("ID проекта");
   return {
     id: p.id,
+    offer: offer(p.offer, p.status),
     name: txt(p.name, 90, hint + " — название"),
     caption: txt(p.caption, 90, "подпись на обложке", true),
     category: txt(p.category, 60, "категорию", true),
@@ -141,7 +172,7 @@ export function normalizeContent(v) {
     ["version", "copy", "projects", "directions", "worlds", "interests"],
     "структуру сайта",
   );
-  if (v.version !== 1) invalid("версию формата");
+  if (v.version !== 2) invalid("версию формата");
   exact(
     v.copy,
     textFields.map((f) => f.key),
@@ -207,13 +238,21 @@ export function normalizeContent(v) {
     },
     7,
   );
-  return { version: 1, copy, projects, directions, worlds, interests };
+  if (new Set(interests.map((n) => n.kind)).size !== interests.length)
+    invalid("уникальные адреса заметок");
+  return { version: 2, copy, projects, directions, worlds, interests };
 }
 export function normalizeDocument(d) {
   exact(d, ["profile", "content"], "документ");
-  return {
-    profile: normalizeProfile(d.profile),
-    content: normalizeContent(d.content),
-  };
+  const profile = normalizeProfile(d.profile),
+    content = normalizeContent(d.content);
+  if (
+    content.projects.some((p) => p.offer.sale === "inquiry") &&
+    !Object.values(profile.contacts).some(Boolean)
+  )
+    invalid(
+      "канал связи: укажите контакт в профиле или выберите «Только витрина»",
+    );
+  return { profile, content };
 }
 export const canonicalDocument = (d) => JSON.stringify(normalizeDocument(d));

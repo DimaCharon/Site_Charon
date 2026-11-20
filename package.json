@@ -1,9 +1,9 @@
 {
   "name": "charon-identity",
   "private": true,
-  "version": "2.2.0",
+  "version": "3.0.0",
   "type": "module",
-  "description": "Charon — интерактивная персональная цифровая идентичность.",
+  "description": "Charon — авторская витрина цифровых продуктов и интерактивная студия обложек.",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",
@@ -26,6 +26,7 @@
     "@types/react-dom": "^19.1.0",
     "@types/three": "0.180.0",
     "@vitejs/plugin-react": "^4.6.0",
+    "esbuild": "0.25.12",
     "jpeg-js": "0.4.4",
     "typescript": "^5.8.3",
     "vite": "^6.4.0"

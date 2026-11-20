@@ -1,3 +1,4 @@
+import { assetUrl } from "../config/routes";
 import { copy } from "../config/site";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -30,7 +31,8 @@ export function Viewport({
   const [activated, setActivated] = useState(
     () =>
       expanded ||
-      (!matchMedia("(pointer: coarse), (max-width: 720px)").matches &&
+      (typeof window !== "undefined" &&
+        !matchMedia("(pointer: coarse), (max-width: 720px)").matches &&
         !(navigator as Navigator & { connection?: { saveData?: boolean } })
           .connection?.saveData),
   );
@@ -96,8 +98,7 @@ export function Viewport({
   }, [activated]);
   const download = () => {
     const link = document.createElement("a");
-    link.href =
-      api.current?.snapshot() || `${import.meta.env.BASE_URL}art/identity.webp`;
+    link.href = api.current?.snapshot() || assetUrl("art/identity.webp");
     link.download = api.current
       ? "charon-artifact.png"
       : "charon-artifact.webp";
@@ -140,7 +141,7 @@ export function Viewport({
       </div>
       <img
         className={"artifact-poster " + (status === "ready" ? "hidden" : "")}
-        src={`${import.meta.env.BASE_URL}art/identity.webp`}
+        src={assetUrl("art/identity.webp")}
         width="900"
         height="680"
         alt={copy["studio.text08"]}

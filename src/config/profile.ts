@@ -47,7 +47,9 @@ export function usePreferences() {
     };
   });
   const [systemReduce, setSystemReduce] = useState(
-    () => matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () =>
+      typeof window !== "undefined" &&
+      matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   useEffect(() => {
     const q = matchMedia("(prefers-reduced-motion: reduce)");

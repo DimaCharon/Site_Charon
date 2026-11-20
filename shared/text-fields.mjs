@@ -1,4 +1,5 @@
 // Stable public copy slots. These labels describe the editing controls, not the published copy.
+import { storefrontFields } from "./storefront-fields.mjs";
 export const textFields = [
   {
     key: "nav.text01",
@@ -87,7 +88,7 @@ export const textFields = [
   {
     key: "hero.secondary",
     group: "hero",
-    label: "Вторая кнопка",
+    label: "Авторская фраза под первым экраном",
     max: 36,
   },
   {
@@ -117,25 +118,25 @@ export const textFields = [
   {
     key: "hero.text05",
     group: "hero",
-    label: "Служебная подпись · CHARON IDENTITY OBJECT",
+    label: "Подпись серии 3D-знака",
     max: 140,
   },
   {
     key: "hero.text06",
     group: "hero",
-    label: "Система онлайн",
+    label: "Подпись статуса витрины",
     max: 140,
   },
   {
     key: "hero.text07",
     group: "hero",
-    label: "Служебная подпись · CHARON OS",
+    label: "Подпись счётчика продуктов",
     max: 140,
   },
   {
     key: "hero.text08",
     group: "hero",
-    label: "Служебная подпись · PERSONAL SPACE",
+    label: "Доступность · направления автора",
     max: 140,
   },
   {
@@ -966,4 +967,5 @@ export const textFields = [
     label: "Подпись по умолчанию у фотографии",
     max: 90,
   },
+  ...storefrontFields,
 ];

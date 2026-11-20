@@ -4,6 +4,9 @@ import { textFields, type Content } from "../../shared/content-schema.mjs";
 import { Field, Select, StudioHeading } from "./Inputs";
 const groups: Record<string, string> = {
   hero: "Главный экран",
+  store: "Витрина и покупка",
+  lab: "Демо — студия обложек",
+  library: "Журнал, гид и версии",
   nav: "Шапка и навигация",
   about: "Обо мне и направления",
   projects: "Галерея проектов",

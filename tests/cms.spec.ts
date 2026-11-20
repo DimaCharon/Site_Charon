@@ -62,7 +62,9 @@ async function routedPreview(context: BrowserContext, root: string) {
     const path =
       new URL(route.request().url()).pathname.slice("/Site_Charon/".length) ||
       "index.html";
-    await route.fulfill({ path: join(root, "dist", path) });
+    await route.fulfill({
+      path: join(root, "dist", path.endsWith("/") ? path + "index.html" : path),
+    });
   });
   return page;
 }
@@ -157,6 +159,24 @@ test("Редактор → подписанный комплект с фото �
       .fill("Проверяем переход из карточки в досье.");
     await dlg.getByLabel("В фокусе проекта").fill("Композиция\nСвет");
     await dlg.getByLabel("Теги").fill("Студия\nЭтюд");
+    await dlg
+      .getByLabel("Статус", { exact: true })
+      .selectOption("Активный проект");
+    await dlg.locator("summary", { hasText: "Демо, цена и продажа" }).click();
+    await dlg
+      .getByLabel("Способ продажи", { exact: true })
+      .selectOption("checkout");
+    await dlg
+      .getByLabel("Цена и валюта", { exact: true })
+      .fill("1 900 ₽ · однократно");
+    await dlg
+      .getByLabel("HTTPS-ссылка покупки", { exact: true })
+      .fill("https://example.org/checkout");
+    await dlg
+      .getByLabel("Условия доступа", { exact: true })
+      .fill("Условия из тестовой копии.");
+    await dlg.getByLabel("Демонстрация", { exact: true }).selectOption("lab");
+    await dlg.locator("summary", { hasText: "Демо, цена и продажа" }).click();
     await dlg
       .getByLabel("Фотография проекта")
       .setInputFiles(await photoFixture(page));
@@ -305,9 +325,6 @@ test("Редактор → подписанный комплект с фото �
       "Архив",
     );
     await expect(live.locator(".field-note")).toContainText("Новая запись");
-    await expect(live.locator(".inspector-content")).toContainText(
-      "Новая подпись",
-    );
     const cards = live.locator(".project-rail .project-card");
     await expect(cards).toHaveCount(oldCount + 1);
     await expect(cards.nth(at).locator("h3")).toHaveText("Орбитальный этюд");
@@ -322,6 +339,24 @@ test("Редактор → подписанный комплект с фото �
       "Проверяем переход из карточки в досье.",
     );
     await live.keyboard.press("Escape");
+    await cards.nth(at).locator(".page-link").click();
+    await expect(live.locator(".access-slip .slip-price")).toHaveText(
+      "1 900 ₽ · однократно",
+    );
+    await expect(
+      live.getByRole("link", { name: content.copy["store.buy"] }),
+    ).toHaveAttribute("href", "https://example.org/checkout");
+    await expect(live.locator(".access-slip")).toContainText(
+      "Условия из тестовой копии.",
+    );
+    await expect(live.locator(".sheet-object .project-cover")).toHaveAttribute(
+      "src",
+      /^\.\.\/\.\.\/media\//,
+    );
+    await live.locator('.desktop-nav a[data-nav="interests"]').click();
+    await expect(live.locator(".inspector-content")).toContainText(
+      "Новая подпись",
+    );
     await live.locator(".interest-card").first().click();
     await expect(live.locator("dialog .dossier-text")).toHaveText(
       "Новая личная заметка.",
@@ -367,13 +402,11 @@ test("Мобильная админка: замена и сброс фото, у
     initial = await page.locator(".project-rail .project-card").count();
   const add = dlg.getByRole("button", { name: "Добавить проект", exact: true });
   await add.click();
-  await dlg
-    .getByLabel("Фотография проекта")
-    .setInputFiles({
-      name: "notes.txt",
-      mimeType: "text/plain",
-      buffer: Buffer.from("not a photograph"),
-    });
+  await dlg.getByLabel("Фотография проекта").setInputFiles({
+    name: "notes.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("not a photograph"),
+  });
   await expect(dlg.getByRole("alert")).toContainText("JPEG, PNG или WebP");
   await dlg
     .getByLabel("Фотография проекта")
@@ -507,6 +540,88 @@ test("Пустая опубликованная галерея и изменён
     });
     for (let i = 0; i < 5; i++) await trigger.click();
     await expect(page.getByLabel("Код доступа", { exact: true })).toBeVisible();
+    expect(errors).toEqual([]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("Предложение по запросу в изолированной витрине ведёт в опубликованный контакт, а не в оплату", async ({
+  context,
+}) => {
+  test.setTimeout(50_000);
+  const dir = await workspace();
+  try {
+    const { content, profile } = loadPublished();
+    profile.contacts = {
+      telegram: "",
+      email: "reader@example.org",
+      github: "",
+      social: "",
+    };
+    content.projects = [
+      {
+        id: "request-example",
+        name: "Проверка запроса",
+        category: "",
+        status: "Разработка",
+        art: "code",
+        short: "Запрос в изолированной копии.",
+        description: "",
+        details: [],
+        tags: [],
+        cover: null,
+        theme: "original",
+        caption: "",
+        offer: {
+          audience: "",
+          result: "",
+          sale: "inquiry",
+          price: "",
+          terms: "Условия обсуждаются с автором.",
+          buyUrl: "",
+          demo: "link",
+          demoUrl: "https://example.org/sample",
+          docsUrl: "https://example.org/guide",
+        },
+      },
+    ];
+    await writeFile(join(dir, "public/identity.json"), JSON.stringify(profile));
+    await writeFile(join(dir, "public/content.json"), JSON.stringify(content));
+    await run(
+      process.execPath,
+      [
+        resolve("node_modules/vite/bin/vite.js"),
+        "build",
+        "--logLevel",
+        "error",
+      ],
+      { cwd: dir },
+    );
+    const p = await routedPreview(context, dir);
+    const errors = errorsOn(p);
+    await p.goto("https://preview.test/Site_Charon/products/request-example/");
+    await expect(p.locator(".slip-actions .primary")).toHaveAttribute(
+      "href",
+      "mailto:reader@example.org?subject=" +
+        encodeURIComponent(content.projects[0].name),
+    );
+    await expect(
+      p.getByRole("link", { name: content.copy["store.buy"] }),
+    ).toHaveCount(0);
+    await expect(
+      p.getByRole("link", { name: content.copy["store.demo"] }),
+    ).toHaveAttribute("href", "https://example.org/sample");
+    await expect(
+      p.getByRole("link", { name: content.copy["store.docs"] }),
+    ).toHaveAttribute("href", "https://example.org/guide");
+    await p.locator("header .contact-nav").click();
+    await expect(p.locator(".contact-channel")).toHaveCount(1);
+    await expect(p.locator(".contact-channel")).toHaveAttribute(
+      "href",
+      "mailto:reader@example.org",
+    );
+    await p.close();
     expect(errors).toEqual([]);
   } finally {
     await rm(dir, { recursive: true, force: true });

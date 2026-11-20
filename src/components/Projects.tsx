@@ -1,3 +1,4 @@
+import { pageHref } from "../config/routes";
 import { copy } from "../config/site";
 import { useRailDrag } from "../hooks/gestures";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
@@ -111,7 +112,9 @@ export function ProjectCard({
   words = copy,
   previewSrc,
   onOpen,
+  pageLink = false,
 }: {
+  pageLink?: boolean;
   p: Project;
   i: number;
   words?: Record<string, string>;
@@ -129,17 +132,43 @@ export function ProjectCard({
     >
       <ProductArt project={p} index={i} words={words} previewSrc={previewSrc} />
       <div className="project-info">
-        <Status project={p} words={words} />
-        <h3>{p.name}</h3>
+        <div className="card-statusline">
+          <Status project={p} words={words} />
+          {p.offer.sale !== "showcase" && p.offer.price ? (
+            <strong>{p.offer.price}</strong>
+          ) : p.offer.sale === "inquiry" ? (
+            <span>{words["store.inquiryTag"]}</span>
+          ) : p.offer.demo !== "none" ? (
+            <span>
+              <i />
+              {words["store.demoTag"]}
+            </span>
+          ) : null}
+        </div>
+        <h3>
+          {pageLink ? (
+            <a href={pageHref("products/" + p.id)}>{p.name}</a>
+          ) : (
+            p.name
+          )}
+        </h3>
         <p>{p.short}</p>
-        <button
-          className="project-link"
-          onClick={onOpen}
-          aria-label={words["projects.more"] + " " + p.name}
-        >
-          {words["projects.more"]}
-          <ArrowUpRight size={15} />
-        </button>
+        <div className="card-links">
+          {pageLink && (
+            <a className="page-link" href={pageHref("products/" + p.id)}>
+              {words["store.page"]}
+              <ArrowUpRight size={15} />
+            </a>
+          )}
+          <button
+            className="project-link"
+            onClick={onOpen}
+            aria-label={words["projects.more"] + " " + p.name}
+          >
+            {words["projects.more"]}
+            <ArrowUpRight size={15} />
+          </button>
+        </div>
       </div>
     </article>
   );
@@ -205,6 +234,10 @@ export function ProjectModal({
       page={{ index, total: projects.length }}
     >
       <ProjectDossier p={p} index={index} />
+      <a className="page-link dossier-page" href={pageHref("products/" + p.id)}>
+        {copy["store.page"]}
+        <ArrowUpRight size={15} />
+      </a>
     </Modal>
   );
 }
@@ -280,6 +313,10 @@ export function Projects({ onOpen }: { onOpen: (index: number) => void }) {
           </div>
           {projects.length > 0 && (
             <div className="rail-nav">
+              <a className="catalog-hop" href={pageHref("products")}>
+                {copy["store.catalogLink"]}
+                <ArrowUpRight size={14} />
+              </a>
               <span className="mono">
                 {String(range.first + 1).padStart(2, "0")}
                 <b> / {String(projects.length).padStart(2, "0")}</b>
@@ -323,7 +360,13 @@ export function Projects({ onOpen }: { onOpen: (index: number) => void }) {
           }}
         >
           {projects.map((p, i) => (
-            <ProjectCard key={p.id} p={p} i={i} onOpen={() => onOpen(i)} />
+            <ProjectCard
+              key={p.id}
+              pageLink
+              p={p}
+              i={i}
+              onOpen={() => onOpen(i)}
+            />
           ))}
         </div>
         <div className="rail-bottom" hidden={!projects.length}>

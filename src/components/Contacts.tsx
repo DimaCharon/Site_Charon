@@ -1,9 +1,9 @@
+import { pageHref, readRoute } from "../config/routes";
 import { copy } from "../config/site";
 import { useEffect, useRef } from "react";
 import {
   ArrowUp,
   ArrowUpRight,
-  Minus,
   Send,
   Mail,
   Github,
@@ -18,6 +18,9 @@ import {
 } from "../config/profile";
 const icons = { telegram: Send, email: Mail, github: Github, social: Globe2 };
 export function Contacts({ profile }: { profile: Profile }) {
+  const channels = (Object.keys(contactNames) as ContactKey[])
+    .map((key) => ({ key, href: safeContact(key, profile.contacts[key]) }))
+    .filter((c): c is { key: ContactKey; href: string } => c.href !== null);
   return (
     <section
       id="contacts"
@@ -36,55 +39,55 @@ export function Contacts({ profile }: { profile: Profile }) {
             {copy["contacts.title1"]}{" "}
             <span className="accent">{copy["contacts.title2"]}</span>
           </h2>
+          {!channels.length && (
+            <div className="folio-code contact-state">
+              {copy["contacts.unset"]}
+            </div>
+          )}
           <p>
-            {copy["contacts.intro1"]}
-            <br className="wide-br" /> {copy["contacts.intro2"]}
+            {channels.length ? (
+              <>
+                {copy["contacts.intro1"]}
+                <br className="wide-br" /> {copy["contacts.intro2"]}
+              </>
+            ) : (
+              copy["contacts.text03"]
+            )}
           </p>
         </div>
-        <div className="contact-channels">
-          {(Object.keys(contactNames) as ContactKey[]).map((k) => {
-            const Icon = icons[k],
-              href = safeContact(k, profile.contacts[k]);
-            const inside = (
-              <>
-                <Icon size={20} strokeWidth={1.4} />
-                <div>
-                  <strong>{copy["contacts." + k]}</strong>
-                  <span>
-                    {href
-                      ? profile.contacts[k].replace(/^https?:\/\//, "")
-                      : copy["contacts.unset"]}
-                  </span>
-                </div>
-                {href ? (
-                  <ArrowUpRight size={15} />
-                ) : (
-                  <Minus size={12} aria-hidden="true" />
-                )}
-              </>
-            );
-            return href ? (
-              <a
-                className="contact-channel"
-                key={k}
-                href={href}
-                target={k === "email" ? undefined : "_blank"}
-                rel="noopener noreferrer"
-              >
-                {inside}
-              </a>
-            ) : (
-              <div className="contact-channel unavailable" key={k}>
-                {inside}
-              </div>
-            );
-          })}
-        </div>
-        <div className="contact-note">
-          {Object.values(profile.contacts).some(Boolean)
-            ? copy["contacts.text02"]
-            : copy["contacts.text03"]}
-        </div>
+        {channels.length ? (
+          <>
+            <div className="contact-channels">
+              {channels.map(({ key, href }) => {
+                const Icon = icons[key];
+                return (
+                  <a
+                    key={key}
+                    className="contact-channel"
+                    href={href}
+                    target={key === "email" ? undefined : "_blank"}
+                    rel="noopener noreferrer"
+                  >
+                    <Icon size={20} strokeWidth={1.4} />
+                    <div>
+                      <strong>{copy["contacts." + key]}</strong>
+                      <span>
+                        {profile.contacts[key].replace(/^https?:\/\//, "")}
+                      </span>
+                    </div>
+                    <ArrowUpRight size={15} />
+                  </a>
+                );
+              })}
+            </div>
+            <div className="contact-note">{copy["contacts.text02"]}</div>
+          </>
+        ) : (
+          <a className="folio-inline" href={pageHref("products")}>
+            {copy["store.toProducts"]}
+            <ArrowUpRight size={15} />
+          </a>
+        )}
       </div>
     </section>
   );
@@ -107,9 +110,29 @@ export function Footer({ onOwner }: { onOwner: () => void }) {
     }
   };
   return (
-    <footer>
+    <footer className="folio-footer">
+      <div className="shell footer-directory">
+        <div>
+          <span className="folio-code">{copy["store.resources"]}</span>
+          <h2>{copy["store.shelf"]}</h2>
+        </div>
+        <nav aria-label={copy["store.shelf"]}>
+          {[
+            ["products", "store.catalog"],
+            ["lab", "lab.title"],
+            ["journal", "library.notes"],
+            ["guide", "library.guide"],
+            ["updates", "library.updates"],
+          ].map(([path, key]) => (
+            <a key={path} href={pageHref(path)}>
+              {copy[key]}
+              <ArrowUpRight size={13} />
+            </a>
+          ))}
+        </nav>
+      </div>
       <div className="shell footer-inner">
-        <a className="brand small-brand" href="#home">
+        <a className="brand small-brand" href={pageHref("", "home")}>
           <Mark />
           <span>{copy["footer.brand"]}</span>
         </a>
@@ -121,7 +144,20 @@ export function Footer({ onOwner }: { onOwner: () => void }) {
         >
           {copy["footer.signature"]}
         </button>
-        <a className="back-top" href="#home">
+        <a
+          className="back-top"
+          href={pageHref(readRoute(), "page-top")}
+          onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({
+              top: 0,
+              behavior:
+                document.documentElement.dataset.motion === "reduced"
+                  ? "instant"
+                  : "smooth",
+            });
+          }}
+        >
           {copy["footer.top"]}
           <ArrowUp size={14} />
         </a>

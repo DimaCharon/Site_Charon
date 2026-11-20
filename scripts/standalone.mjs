@@ -9,11 +9,25 @@ import { loadPublished } from "./published-data.mjs";
 import { publishMetadata } from "../shared/metadata.mjs";
 const { profile, content, media: inlineMedia } = loadPublished("public", true);
 const hasMascot = existsSync("public/models/charon.glb");
+const embedded = {};
+for (const [name, mime] of [
+  ["art/identity.webp", "image/webp"],
+  ["art/studio-lut.png", "image/png"],
+  ["art/brushed.webp", "image/webp"],
+  ...(hasMascot ? [["models/charon.glb", "model/gltf-binary"]] : []),
+])
+  embedded[name] =
+    "data:" +
+    mime +
+    ";base64," +
+    (await readFile("public/" + name)).toString("base64");
 const result = await build({
   configFile: false,
   plugins: [react()],
   base: "./",
   define: {
+    __CHARON_OFFLINE__: "true",
+    __CHARON_ASSETS__: JSON.stringify(embedded),
     __CHARON_CONTENT__: JSON.stringify(content),
     __CHARON_MEDIA__: JSON.stringify(inlineMedia),
     __HAS_MASCOT__: JSON.stringify(hasMascot),
@@ -33,26 +47,6 @@ const uri = async (path, mime) =>
 let js = files.find((f) => f.type === "chunk" && f.isEntry).code;
 let css = String(files.find((f) => f.fileName.endsWith(".css")).source);
 let html = String(files.find((f) => f.fileName === "index.html").source);
-const poster = await uri("public/art/identity.webp", "image/webp");
-js =
-  "const __charonPoster=" +
-  JSON.stringify(poster) +
-  ";\n" +
-  js.replaceAll('"./art/identity.webp"', "__charonPoster");
-for (const [name, mime] of [
-  ["studio-lut.png", "image/png"],
-  ["brushed.webp", "image/webp"],
-]) {
-  js = js.replaceAll(
-    JSON.stringify("./art/" + name),
-    JSON.stringify(await uri("public/art/" + name, mime)),
-  );
-}
-if (hasMascot)
-  js = js.replaceAll(
-    '"./models/charon.glb"',
-    JSON.stringify(await uri("public/models/charon.glb", "model/gltf-binary")),
-  );
 for (const name of ["manrope-cyrillic.woff2", "manrope-latin.woff2"]) {
   const font = await uri("public/fonts/" + name, "font/woff2");
   css = css

@@ -1,3 +1,4 @@
+import { assetUrl } from "../config/routes";
 import { copy } from "../config/site";
 import { usePagingGesture } from "../hooks/gestures";
 import { useState, useRef } from "react";
@@ -122,7 +123,7 @@ export function World({ name }: { name: string }) {
           </svg>
           <div className="atlas-center">
             <img
-              src={`${import.meta.env.BASE_URL}art/identity.webp`}
+              src={assetUrl("art/identity.webp")}
               width="900"
               height="680"
               alt={copy["world.text08"]}

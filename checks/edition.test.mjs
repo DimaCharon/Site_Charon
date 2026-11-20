@@ -1,3 +1,5 @@
+import { canonicalProfile } from "../shared/profile-schema.mjs";
+import { blankOffer } from "../shared/offer.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHmac, createHash, randomBytes } from "node:crypto";
@@ -66,6 +68,7 @@ const sign = (patch, override = {}, current = original) => {
 };
 const sample = {
   id: "test-cover",
+  offer: blankOffer(),
   name: "Тестовая карточка",
   category: "",
   caption: "",
@@ -320,4 +323,82 @@ test("Метаданные остаются текстом, включая ка�
   );
   assert.ok(html.includes("<title>А &amp; Б &lt; I &gt;</title>"));
   assert.ok(html.includes('content="Описание с &quot;кавычками&quot;"'));
+});
+
+test("Покупка требует активного статуса, настоящей HTTPS-ссылки и объявленной цены; запрос требует контакта", () => {
+  const root = structuredClone(original);
+  const p = {
+    ...sample,
+    status: "Активный проект",
+    offer: {
+      ...blankOffer(),
+      sale: "checkout",
+      price: "Тестовая цена",
+      buyUrl: "https://example.org/checkout",
+    },
+  };
+  root.content.projects = [p];
+  assert.equal(
+    normalizeDocument(root).content.projects[0].offer.buyUrl,
+    p.offer.buyUrl,
+  );
+  for (const extra of [
+    { price: "" },
+    { buyUrl: "http://example.org/" },
+    { buyUrl: "https://user:password@example.org/" },
+    { demo: "link", demoUrl: "" },
+    { docsUrl: "not a link" },
+  ]) {
+    const d = structuredClone(root);
+    Object.assign(d.content.projects[0].offer, extra);
+    assert.throws(() => normalizeDocument(d));
+  }
+  root.content.projects[0].status = "Концепция";
+  assert.throws(() => normalizeDocument(root));
+  root.content.projects[0].offer = { ...blankOffer(), sale: "inquiry" };
+  root.profile.contacts = { telegram: "", email: "", github: "", social: "" };
+  assert.throws(() => normalizeDocument(root), /канал связи/);
+  root.profile.contacts.email = "preview@example.org";
+  assert.equal(
+    normalizeDocument(root).content.projects[0].offer.sale,
+    "inquiry",
+  );
+});
+
+test("В том числе проверочный CH1 не оставляет активный запрос без канала связи", async (t) => {
+  const root = await temp(t),
+    current = structuredClone(original);
+  current.content.projects = [
+    { ...sample, offer: { ...blankOffer(), sale: "inquiry" } },
+  ];
+  current.profile.contacts = {
+    telegram: "",
+    email: "preview@example.org",
+    github: "",
+    social: "",
+  };
+  const next = {
+    ...current.profile,
+    contacts: { telegram: "", email: "", github: "", social: "" },
+  };
+  const body = JSON.stringify({
+    v: 1,
+    issued: now,
+    repo: repository,
+    base: hash(canonicalProfile(current.profile)),
+    profile: next,
+  });
+  const framed = "CH1." + Buffer.from(body).toString("base64url"),
+    packet =
+      framed +
+      "." +
+      createHmac("sha256", Buffer.from(key, "hex"))
+        .update(framed)
+        .digest("hex");
+  for (const checkOnly of [true, false])
+    await assert.rejects(
+      applyEdition({ current, request, packet, root, checkOnly }),
+      /канал связи/,
+    );
+  assert.deepEqual(await readdir(root), ["media"]);
 });
