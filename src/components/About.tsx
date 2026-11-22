@@ -1,10 +1,12 @@
 import { copy } from "../config/site";
+import { pageHref } from "../config/routes";
 import { usePagingGesture } from "../hooks/gestures";
 import { useRef, useState } from "react";
 import {
   ScanLine,
   LockKeyhole,
   ArrowDownRight,
+  ArrowUpRight,
   Fingerprint as FingerprintIcon,
 } from "lucide-react";
 import { directions } from "../config/site";
@@ -21,22 +23,14 @@ export function About({ name }: { name: string }) {
     <section
       className="section about-section shell"
       id="about"
-      aria-labelledby="about-title"
+      aria-label={copy["about.title"]}
     >
       <div className="about-grid">
         <div className="about-copy reveal">
-          <SectionLabel num={copy["about.number"]}>
-            {copy["about.text01"]}
-          </SectionLabel>
-          <h2 id="about-title">
-            {copy["about.title"]}
-            <span className="accent">{copy["about.endMark"]}</span>
-          </h2>
           <p className="about-intro">
             {copy["about.lead1"]} <em>{copy["about.lead2"]}</em>{" "}
             {copy["about.lead3"]}
           </p>
-          <p className="body-copy">{copy["about.description"]}</p>
         </div>
         <div className="identity-card reveal">
           <div className="id-mesh" />
@@ -116,6 +110,63 @@ export function About({ name }: { name: string }) {
           <ArrowDownRight size={17} />
           <p key={selected}>{dir.text}</p>
         </div>
+      </div>
+    </section>
+  );
+}
+export function AboutTeaser() {
+  return (
+    <section
+      className="section about-teaser shell"
+      id="about"
+      aria-labelledby="about-teaser-title"
+    >
+      <div className="about-teaser-copy reveal">
+        <SectionLabel num={copy["about.number"]}>
+          {copy["about.text01"]}
+        </SectionLabel>
+        <h2 id="about-teaser-title">
+          {copy["about.title"]}
+          <span className="accent">{copy["about.endMark"]}</span>
+        </h2>
+        <p className="body-copy">{copy["about.description"]}</p>
+      </div>
+      <a className="about-teaser-link reveal" href={pageHref("about")}>
+        {copy["about.more"]}
+        <ArrowUpRight size={18} aria-hidden="true" />
+      </a>
+    </section>
+  );
+}
+export function WhyChoose() {
+  const cards: [string, string][] = [
+    [copy["about.why1Title"], copy["about.why1Text"]],
+    [copy["about.why2Title"], copy["about.why2Text"]],
+    [copy["about.why3Title"], copy["about.why3Text"]],
+  ];
+  return (
+    <section
+      className="section why-block shell"
+      aria-labelledby="why-title"
+    >
+      <div className="folio-code">
+        <i />
+        {copy["about.whyKicker"]}
+      </div>
+      <h2 id="why-title" className="reveal">
+        {copy["about.whyTitle"]}
+      </h2>
+      <p className="why-lead reveal">{copy["about.whyLead"]}</p>
+      <div className="why-grid">
+        {cards.map(([title, text], i) => (
+          <article className="why-card reveal" key={title}>
+            <span className="why-index mono">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </article>
+        ))}
       </div>
     </section>
   );

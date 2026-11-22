@@ -7,6 +7,7 @@ export const fixedPages = [
   "updates",
   "contacts",
   "references",
+  "about",
 ];
 export function publishedPaths(c) {
   return [
@@ -49,6 +50,7 @@ export function pageMeta(path, c, profile) {
       journal: ["library.notes", "library.notesIntro"],
       guide: ["library.guide", "library.guideIntro"],
       updates: ["library.updates", "library.updatesIntro"],
+      about: ["about.title", "about.description"],
     }[section];
     if (item) {
       name = w[item[0]];

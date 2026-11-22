@@ -408,10 +408,6 @@
 .snow-film svg {
   display: block;
 }
-.brief-desk:focus-within ~ .snow-film,
-body:has(.brief-paper:focus-within) .snow-film {
-  visibility: hidden;
-}
 :root[data-theme="light"] .snow-film {
   --grain-shadow: 0 0 0 0.5px #6d78909c, 0 1px 2px #4e597a9c;
 }

@@ -113,7 +113,7 @@ test("Снег: выключен по умолчанию, запоминает �
   await quick.click();
   await expect(grains).toHaveCount(36);
   await page.locator("#brief-name").focus();
-  await expect(snow).toHaveCSS("visibility", "hidden");
+  await expect(snow).toHaveCSS("visibility", "visible");
   await page.locator("#brief-name").blur();
   await expect(snow).toHaveCSS("visibility", "visible");
   await page.emulateMedia({ reducedMotion: "reduce" });

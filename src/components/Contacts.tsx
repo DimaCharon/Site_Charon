@@ -75,6 +75,7 @@ export function Footer({ onOwner }: { onOwner: () => void }) {
         <nav aria-label={copy["store.shelf"]}>
           {[
             ["products", "store.catalog"],
+            ["about", "nav.about"],
             ["references", "refs.title"],
             ["contacts", "nav.contacts"],
             ["lab", "lab.title"],

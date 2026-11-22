@@ -980,3 +980,98 @@
 .back-top:hover {
   color: var(--text);
 }
+
+/* Тизер «Обо мне» на главной ведёт на отдельную страницу. */
+.about-teaser {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 34px;
+  border-top: 1px solid var(--line);
+  padding-block: clamp(54px, 6vw, 96px);
+}
+.about-teaser h2 {
+  margin: 16px 0 14px;
+}
+.about-teaser .body-copy {
+  max-width: 570px;
+}
+.about-teaser-link {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 620;
+  color: var(--text);
+  transition:
+    color 0.25s,
+    border-color 0.25s;
+}
+.about-teaser-link:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.about-teaser-link svg {
+  transition: transform 0.25s;
+}
+.about-teaser-link:hover svg {
+  transform: translate(2px, -2px);
+}
+/* Блок «почему стоит выбрать меня» на странице «Обо мне». */
+.why-block {
+  border-top: 1px solid var(--line);
+  padding-block: clamp(54px, 6vw, 96px);
+}
+.why-block h2 {
+  margin: 17px 0;
+  max-width: 760px;
+}
+.why-lead {
+  max-width: 640px;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+.why-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--sheet-rule);
+  border-radius: 11px;
+  background: var(--panel);
+  padding: 22px 22px 26px;
+}
+.why-index {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.why-card h3 {
+  font-size: 17px;
+  font-weight: 620;
+  letter-spacing: -0.012em;
+}
+.why-card p {
+  font-size: 13px;
+  line-height: 1.78;
+  color: var(--muted);
+}
+@media (max-width: 900px) {
+  .about-teaser {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 26px;
+  }
+  .why-grid {
+    grid-template-columns: 1fr;
+  }
+}

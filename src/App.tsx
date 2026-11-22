@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
-import { About } from "./components/About";
+import { About, AboutTeaser, WhyChoose } from "./components/About";
 import { Projects, ProjectModal } from "./components/Projects";
 import { World } from "./components/World";
 import { Interests, InterestModal } from "./components/Interests";
@@ -95,7 +95,7 @@ function Edition({
             />
             <Projects onOpen={setProject} />
             <LabInvitation />
-            <About name={profile.name} />
+            <AboutTeaser />
           </>
         ) : path === "contacts" ? (
           <BriefDesk />
@@ -118,6 +118,18 @@ function Edition({
             </div>
             <Interests onOpen={setInterest} />
             <World name={profile.name} />
+          </>
+        ) : path === "about" ? (
+          <>
+            <div className="shell journal-lead">
+              <PageLead
+                kicker={copy["about.text01"]}
+                title={copy["about.title"]}
+                description={copy["about.description"]}
+              />
+            </div>
+            <About name={profile.name} />
+            <WhyChoose />
           </>
         ) : n >= 0 ? (
           <NotePage index={n} />

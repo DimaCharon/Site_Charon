@@ -123,7 +123,7 @@ test("Профиль, интерактивные направления, сем�
   page,
 }) => {
   await posterMode(page);
-  await page.goto("/");
+  await page.goto("/about/");
   await page.getByRole("tab", { name: dirs[1].title, exact: true }).click();
   await expect(page.getByRole("tabpanel")).toContainText(dirs[1].text);
   await page.keyboard.press("ArrowRight");
@@ -165,7 +165,7 @@ test("Посетитель видит только опубликованный 
       }),
     ),
   );
-  await page.goto("/");
+  await page.goto("/about/");
   await expect(page.locator(".id-name")).toHaveText(publicIdentity.name);
   await expect(page.locator(".contact-channels button")).toHaveCount(0);
   await expect(page.locator(".identity-card button")).toHaveCount(0);
@@ -316,6 +316,7 @@ test("Пять нажатий, пароль и изолированный чер
     page.getByRole("link", { name: "Открыть GitHub" }),
   ).toHaveAttribute("href", /actions\/workflows\/owner-profile\.yml$/);
   await page.keyboard.press("Escape");
+  await page.goto("/about/");
   await expect(page.locator(".id-name")).toHaveText(publicIdentity.name);
   await page.reload();
   await expect(page.locator(".id-name")).toHaveText(publicIdentity.name);
@@ -350,6 +351,7 @@ test("Мышью листаются галерея, досье, направле
     );
     await page.keyboard.press("Escape");
   }
+  await page.goto("/about/");
   await drag(page, ".field-note", -115);
   await expect(page.getByRole("tab", { name: dirs[1].title })).toHaveAttribute(
     "aria-selected",

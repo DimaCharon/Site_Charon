@@ -19,7 +19,7 @@ export function Header({
   const path = readRoute();
   const pinned = path.startsWith("journal")
     ? "interests"
-    : path === "contacts" || path === "references"
+    : path === "contacts" || path === "references" || path === "about"
       ? path
       : path.startsWith("products") || path === "lab"
         ? "projects"
@@ -31,7 +31,7 @@ export function Header({
       ? { link: pageHref("lab"), label: copy["lab.start"] }
       : { link: pageHref("contacts"), label: copy["nav.contact"] };
   const navHref = (id: string) =>
-    id === "contacts" || id === "references"
+    id === "contacts" || id === "references" || id === "about"
       ? pageHref(id)
       : id === "interests"
         ? pageHref("journal")
