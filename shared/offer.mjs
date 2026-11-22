@@ -4,6 +4,7 @@ export const blankOffer = () => ({
   sale: "showcase",
   price: "",
   terms: "",
+  siteUrl: "",
   buyUrl: "",
   demo: "none",
   demoUrl: "",

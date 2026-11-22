@@ -1,0 +1,605 @@
+/* The toolbar and its snow switch share the same preference on every screen. */
+.snow-trigger {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 620;
+  line-height: 1.2;
+  touch-action: manipulation;
+}
+.snow-trigger > span {
+  max-width: 7ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.snow-trigger:hover:not(:disabled),
+.snow-trigger[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: var(--sheet-rule);
+  background: var(--accent-tint);
+}
+.snow-trigger:disabled {
+  opacity: 0.62;
+}
+.snow-track {
+  position: relative;
+  display: block;
+  width: 21px;
+  height: 12px;
+  border: 1px solid var(--soft);
+  border-radius: 12px;
+}
+.snow-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  transition: transform 0.18s;
+}
+.snow-trigger[aria-pressed="true"] .snow-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.snow-trigger[aria-pressed="true"] .snow-track::after {
+  background: var(--bg);
+  transform: translateX(9px);
+}
+
+/* Keep original media and deliberately chosen cover materials intact. The
+   default drawings, their ink and their paper follow the reader's theme. */
+.material-original:not(.with-cover) {
+  background-color: var(--panel);
+  background-image: radial-gradient(
+    ellipse at 60% 45%,
+    var(--stage-light),
+    transparent 75%
+  );
+}
+.material-original:not(.with-cover) .art-grid {
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+}
+.material-original:not(.with-cover) :is(.art-topline, .art-bottomline) {
+  color: var(--muted);
+}
+:root[data-theme="light"]
+  :is(
+    .material-original,
+    .study-art,
+    .interest-card,
+    .world-inspector,
+    .satellite
+  )
+  .generative-art
+  stop:nth-child(1) {
+  stop-color: #473757;
+}
+:root[data-theme="light"]
+  :is(
+    .material-original,
+    .study-art,
+    .interest-card,
+    .world-inspector,
+    .satellite
+  )
+  .generative-art
+  stop:nth-child(2) {
+  stop-color: #968ba3;
+}
+:root[data-theme="light"]
+  :is(
+    .material-original,
+    .study-art,
+    .interest-card,
+    .world-inspector,
+    .satellite
+  )
+  .generative-art
+  stop:nth-child(3) {
+  stop-color: #59506b;
+}
+:root[data-theme="light"]
+  :is(
+    .material-original,
+    .study-art,
+    .interest-card,
+    .world-inspector,
+    .satellite
+  )
+  .generative-art
+  stop:nth-child(4) {
+  stop-color: #846a9a;
+}
+:root[data-theme="light"]
+  :is(
+    .material-original,
+    .study-art,
+    .interest-card,
+    .world-inspector,
+    .satellite
+  )
+  .generative-art
+  stop:nth-child(5) {
+  stop-color: #423b4e;
+}
+:root[data-theme="light"] .modal::backdrop {
+  background: rgb(53 51 62 / 28%);
+}
+
+/* A real second link, never a button inside a clickable anchor. The title's
+   hit area covers the dossier row; the independent site link sits above it. */
+.shelf-row {
+  position: relative;
+  isolation: isolate;
+}
+.shelf-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+.shelf-title:focus-visible {
+  outline: 0;
+}
+.shelf-title:focus-visible::after {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.product-site-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  border-radius: 24px;
+  border: 1px solid var(--sheet-rule);
+  padding: 6px 13px;
+  color: var(--text);
+  background: var(--bg);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.product-site-link svg {
+  flex: none;
+}
+.product-site-link.featured-site {
+  color: #201d29;
+  background: var(--button);
+  border-color: transparent;
+}
+.product-site-link:hover {
+  border-color: var(--accent);
+}
+.product-site-link.featured-site:hover {
+  background: #d4c7f7;
+}
+.shelf-end .product-site-link {
+  position: relative;
+  z-index: 2;
+}
+.project-info > .product-site-link,
+.dossier-text + .product-site-link {
+  margin-top: 14px;
+}
+.slip-actions .product-site-link {
+  min-height: 42px;
+}
+
+@media (min-width: 901px) and (max-width: 1230px) {
+  .header .masthead-stamp {
+    display: none;
+  }
+  .header-inner,
+  .header-actions {
+    gap: 9px;
+  }
+  .desktop-nav a {
+    padding-inline: 8px;
+  }
+  .snow-trigger > span {
+    display: none;
+  }
+}
+@media (max-width: 900px) {
+  .header .desktop-nav {
+    display: none;
+  }
+  .header .masthead-stamp {
+    display: none;
+  }
+  .header .mobile-menu {
+    display: inline-flex !important;
+  }
+  .header .header-actions {
+    gap: 5px;
+    flex: none;
+  }
+  .header :is(.mobile-menu, .settings-trigger) {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+  }
+  .header .mobile-menu {
+    background: var(--panel);
+  }
+  .header .settings-trigger::after {
+    content: none;
+  }
+  .header .snow-trigger {
+    min-height: 44px;
+  }
+}
+@media (max-width: 720px) {
+  :root {
+    --gutter: clamp(16px, 5.1vw, 29px);
+  }
+  html {
+    scroll-padding-top: calc(78px + env(safe-area-inset-top));
+  }
+  .header {
+    height: calc(64px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+  .header-inner {
+    gap: 7px;
+  }
+  .header .brand {
+    gap: 7px;
+    min-width: 0;
+  }
+  .header .brand > span {
+    font-size: clamp(15px, 4.5vw, 19px);
+  }
+  .header .brand > svg {
+    width: 24px;
+    height: 24px;
+  }
+  .header .contact-nav {
+    display: none;
+  }
+  .folio-footer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* A pocket edition of the atelier: a tightly set masthead, a signed plate
+     with its own light, then spacious image-first cards rather than thumbnails. */
+  .atelier-mast {
+    padding-top: 17px;
+  }
+  .atelier-mast .folio-code {
+    font-size: clamp(7px, 2vw, 9px);
+    letter-spacing: 0.1em;
+  }
+  .atelier-hero .hero-inner {
+    gap: 20px;
+    padding: 19px 0 15px;
+  }
+  .atelier-hero .hero-copy {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: clamp(10px, 4vw, 20px);
+  }
+  .hero-copy > :is(.author-line, h1, .hero-description) {
+    grid-column: 1/-1;
+  }
+  .author-line .hero-author {
+    font-size: 16px;
+  }
+  .atelier-hero .hero-copy h1 {
+    font-size: clamp(47px, 14.6vw, 78px);
+    line-height: 0.96;
+    margin: 17px 0 13px;
+    letter-spacing: -0.065em;
+  }
+  .atelier-hero .hero-copy h1 > span {
+    display: block;
+  }
+  .atelier-hero .hero-copy h1 .accent {
+    line-height: 1.02;
+  }
+  .atelier-hero .hero-description {
+    font-size: clamp(14px, 3.75vw, 16px);
+    line-height: 1.55;
+  }
+  .atelier-hero .hero-actions {
+    margin-top: 16px;
+  }
+  .atelier-hero .hero-actions .button {
+    min-height: 46px;
+    padding-inline: 18px;
+    gap: 16px;
+    font-size: 13px;
+  }
+  .atelier-disciplines {
+    align-self: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    border-left: 1px solid var(--line);
+    padding-left: 11px;
+    margin-top: 16px;
+    font-size: 8px;
+    letter-spacing: 0.09em;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+  .atelier-disciplines span + span::before {
+    content: none;
+  }
+  .specimen {
+    border-radius: 12px;
+    box-shadow:
+      inset 0 1px 0 var(--hair),
+      0 6px 18px color-mix(in srgb, var(--text) 5%, transparent);
+  }
+  .specimen :is(.specimen-head, .specimen-foot) {
+    margin-inline: 14px;
+    padding: 8px 0;
+  }
+  .specimen .specimen-head > .folio-code,
+  .specimen .specimen-foot > .folio-code {
+    font-size: 8px;
+    letter-spacing: 0.12em;
+  }
+  .specimen-head .folio-code::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .specimen .viewport {
+    height: clamp(206px, 55vw, 324px);
+  }
+  .specimen .viewport::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+    inset: 27% 0;
+    background:
+      repeating-linear-gradient(
+          0deg,
+          var(--sheet-rule) 0 1px,
+          transparent 1px 12px
+        )
+        left center / 4px 100% no-repeat,
+      repeating-linear-gradient(
+          0deg,
+          var(--sheet-rule) 0 1px,
+          transparent 1px 12px
+        )
+        right center / 4px 100% no-repeat;
+  }
+  .specimen .viewport-top {
+    top: 10px;
+  }
+  .specimen .viewport-bottom {
+    bottom: 6px;
+  }
+  .viewport .scene-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+  }
+  .viewport .activate-3d {
+    min-height: 44px;
+    padding-inline: 12px;
+    border-radius: 24px;
+    font-size: 11px;
+  }
+  .specimen .artifact-poster {
+    filter: drop-shadow(0 8px 8px #1310182b);
+  }
+  .atelier-baseline {
+    font-size: 10px;
+    min-height: 38px;
+  }
+  .atelier-baseline a {
+    min-height: 44px;
+  }
+
+  .project-rail .project-card {
+    flex-basis: min(92%, 450px);
+    border-radius: 12px;
+  }
+  .project-rail .product-art {
+    height: clamp(177px, 47vw, 237px);
+  }
+  .project-info > p,
+  .about-copy .body-copy,
+  .lab-invitation p {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .card-links .page-link,
+  .card-links .project-link {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .project-info {
+    padding: 17px 17px 10px;
+  }
+  .card-links {
+    margin-top: 10px;
+  }
+  .product-site-link,
+  .slip-actions .button,
+  .like-link,
+  .ref-actions .folio-inline,
+  .rail-nav .icon-button,
+  .menu-modal nav a {
+    min-height: 44px;
+  }
+  .rail-nav .icon-button {
+    min-width: 44px;
+  }
+  .catalog-hop {
+    min-height: 44px;
+    align-items: center;
+  }
+  .catalog-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .shelf-filters {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+  .shelf-filters > svg {
+    display: none;
+  }
+  .shelf-filters button {
+    min-height: 40px;
+    padding: 5px 9px;
+    font-size: 12px;
+  }
+  .shelf-search {
+    min-height: 44px;
+    border-radius: 8px;
+  }
+  .shelf-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    gap: 17px;
+    margin-top: 9px;
+  }
+  .shelf-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 24px;
+    grid-template-rows: auto 1fr auto;
+    gap: 0;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    align-items: start;
+  }
+  .shelf-row .product-art {
+    grid-column: 1/-1;
+    grid-row: 1;
+    width: 100%;
+    aspect-ratio: 2.32;
+    border-radius: 11px 11px 0 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .shelf-index {
+    display: block;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    padding: 3px 8px;
+    font: 10px/1.4 var(--mono);
+    letter-spacing: 0.08em;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    pointer-events: none;
+  }
+  .shelf-body {
+    grid-column: 1/-1;
+    grid-row: 2;
+    padding: 14px 17px 8px;
+  }
+  .shelf-body .folio-code {
+    font-size: 9px;
+  }
+  .shelf-body h2 {
+    font-size: clamp(25px, 6.8vw, 33px);
+    margin: 5px 0 7px;
+  }
+  .shelf-body p {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .shelf-end {
+    grid-column: 1/-1;
+    grid-row: 3;
+    padding: 5px 45px 14px 17px;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .shelf-end .project-status {
+    font-size: 10px;
+  }
+  .shelf-arrow {
+    grid-column: 2;
+    grid-row: 3;
+    place-self: end;
+    margin: 0 16px 16px 0;
+    width: 17px;
+    color: var(--accent);
+  }
+  .ref-sheet,
+  .brief-paper,
+  .access-slip,
+  .sheet-object {
+    border-radius: 12px;
+  }
+  .ref-actions {
+    gap: 7px 17px;
+  }
+  .ref-description p,
+  .brief-row p,
+  .brief-row li {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .brief-fields :is(input, textarea, select),
+  .lab-tools :is(select, input:not([type="range"])) {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  .interest-card p,
+  .field-note p {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .footer-directory nav a {
+    min-height: 40px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 370px) {
+  .snow-trigger {
+    padding-inline: 9px;
+    gap: 5px;
+  }
+  .snow-trigger > span {
+    display: none;
+  }
+  .shelf-filters button {
+    padding-inline: 7px;
+    font-size: 11px;
+  }
+}
+@media print {
+  .header-actions,
+  .snow-film {
+    display: none !important;
+  }
+}

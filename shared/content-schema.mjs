@@ -100,7 +100,14 @@ function cover(v) {
   };
 }
 function offer(v, status) {
-  exact(v, Object.keys(blankOffer()), "формат предложения");
+  // v2 offers written before product sites were introduced have no siteUrl.
+  const keys = Object.keys(blankOffer());
+  const hasSite = v != null && Object.hasOwn(v, "siteUrl");
+  exact(
+    v,
+    hasSite ? keys : keys.filter((k) => k !== "siteUrl"),
+    "формат предложения",
+  );
   const link = (v, field) => {
     const s = txt(v, 1200, field, true);
     if (!s) return "";
@@ -114,6 +121,7 @@ function offer(v, status) {
     sale: choice(v.sale, ["showcase", "inquiry", "checkout"], "способ продажи"),
     price: txt(v.price, 90, "цену", true),
     terms: txt(v.terms, 800, "условия", true),
+    siteUrl: link(hasSite ? v.siteUrl : "", "адрес сайта продукта"),
     buyUrl: link(v.buyUrl, "ссылку покупки"),
     demo: choice(v.demo, ["none", "lab", "link"], "тип демо"),
     demoUrl: link(v.demoUrl, "ссылку демо"),
@@ -175,13 +183,18 @@ export function normalizeContent(v) {
   if (v.version !== 2) invalid("версию формата");
   exact(
     v.copy,
-    textFields.map((f) => f.key),
+    textFields
+      .filter(
+        (f) =>
+          !("legacyDefault" in f) || (v.copy && Object.hasOwn(v.copy, f.key)),
+      )
+      .map((f) => f.key),
     "набор подписей",
   );
   const copy = {};
   for (const f of textFields)
     copy[f.key] = txt(
-      v.copy[f.key],
+      Object.hasOwn(v.copy, f.key) ? v.copy[f.key] : f.legacyDefault,
       f.max,
       f.label,
       optionalCopy.has(f.key) ||

@@ -1,6 +1,7 @@
 import { build } from "esbuild";
-import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, readFile } from "node:fs/promises";
 import { resolve, join } from "node:path";
+import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { publicOrigin, publishedPaths, pageMeta } from "../shared/routes.mjs";
 import { publishMetadata } from "../shared/metadata.mjs";
@@ -101,11 +102,14 @@ export function staticEdition(doc, define) {
               .join("") +
             "</urlset>\n",
         });
-        const w = doc.content.copy;
+        // A Pages 404 can live at arbitrary depth: no relative script URL is safe here.
+        const w = doc.content.copy,
+          early = await readFile("public/appearance.js", "utf8"),
+          hash = createHash("sha256").update(early).digest("base64");
         this.emitFile({
           type: "asset",
           fileName: "404.html",
-          source: `<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>404 — ${esc(w["store.missing"])}</title><style>body{margin:12vh 8vw;background:#141518;color:#eeeef1;font:18px/1.6 system-ui}small{letter-spacing:.15em;color:#c4b5d9}h1{font-size:clamp(34px,6vw,86px)}a{color:#cebfed}</style><main><small>${esc(w["nav.brand"])} / 404</small><h1>${esc(w["store.missing"])}</h1><a href="${publicOrigin}products/">${esc(w["store.toProducts"])} →</a></main></html>`,
+          source: `<!doctype html><html lang="ru"><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-${hash}'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><script>${early}</script><meta name="robots" content="noindex"><title>404 — ${esc(w["store.missing"])}</title><style>:root{color-scheme:dark;--bg:#000;--fg:#f5f5f7;--ink:#c7b3e7;background:var(--bg);color:var(--fg)}:root[data-theme="light"]{color-scheme:light;--bg:#fff;--fg:#15151a;--ink:#63507f}body{margin:12vh 8vw;font:18px/1.6 system-ui}small{letter-spacing:.15em;color:var(--ink)}h1{font-size:clamp(34px,6vw,86px)}a{color:var(--ink)}</style><main><small>${esc(w["nav.brand"])} / 404</small><h1>${esc(w["store.missing"])}</h1><a href="${publicOrigin}products/">${esc(w["store.toProducts"])} →</a></main></html>`,
         });
         console.log(
           "Static storefront:",

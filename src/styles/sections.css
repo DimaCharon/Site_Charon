@@ -32,10 +32,10 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border: 1px solid #43404d;
+  border: 1px solid var(--sheet-rule);
   border-radius: 11px;
-  background: #1a191f;
-  color: #eeeaf5;
+  background: var(--panel);
+  color: var(--text);
   min-height: 223px;
   padding: 21px 25px 18px;
   max-width: 530px;
@@ -52,10 +52,10 @@
   z-index: -1;
   background: linear-gradient(
     118deg,
-    #222127 0%,
-    #1b1b20 44%,
-    #292630 76%,
-    #1b1920 100%
+    var(--panel-raised) 0%,
+    var(--panel) 44%,
+    color-mix(in srgb, var(--accent) 11%, var(--panel)) 76%,
+    var(--panel) 100%
   );
 }
 .id-mesh {
@@ -78,9 +78,9 @@
   width: 43%;
   right: 4%;
   bottom: 1%;
-  color: #b5a6c6;
+  color: var(--accent);
   transform: rotate(8deg);
-  filter: drop-shadow(1px 1px 0 #08080a);
+  filter: drop-shadow(1px 1px 0 var(--bg));
   pointer-events: none;
 }
 .id-top,
@@ -98,17 +98,17 @@
   gap: 8px;
   font-size: 8px;
   letter-spacing: 0.16em;
-  color: #c0b8cf;
+  color: var(--muted);
 }
 .id-top button {
-  color: #a198ac;
+  color: var(--muted);
   width: 24px;
   height: 24px;
   display: grid;
   place-items: center;
 }
 .id-top button:hover {
-  color: #fff;
+  color: var(--text);
 }
 .id-name {
   position: relative;
@@ -123,22 +123,22 @@
 .id-role {
   position: relative;
   font-size: 11px;
-  color: #b0aab9;
+  color: var(--muted);
   margin-top: 4px;
 }
 .id-bottom {
   margin-top: 23px;
   padding-top: 13px;
-  border-top: 1px solid #e4d8ff1c;
+  border-top: 1px solid var(--hair);
 }
 .id-bottom > span {
   font-size: 7px;
-  color: #a8a1b3;
+  color: var(--muted);
 }
 .id-square {
   width: 5px;
   height: 5px;
-  border: 1px solid #a294bf;
+  border: 1px solid var(--accent);
 }
 .barcode {
   width: 54px;
@@ -146,13 +146,13 @@
   opacity: 0.8;
   background: repeating-linear-gradient(
     90deg,
-    #a9a1ba 0 1px,
+    var(--muted) 0 1px,
     transparent 1px 3px,
-    #a9a1ba 3px 6px,
+    var(--muted) 3px 6px,
     transparent 6px 8px,
-    #a9a1ba 8px 9px,
+    var(--muted) 8px 9px,
     transparent 9px 10px,
-    #a9a1ba 10px 12px,
+    var(--muted) 10px 12px,
     transparent 12px 15px
   );
 }

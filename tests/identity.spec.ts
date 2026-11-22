@@ -234,6 +234,13 @@ test("Без WebGL, reduced motion и доступность в обеих те�
         .click();
       await page.keyboard.press("Escape");
     }
+    const rgb = theme === "dark" ? "rgb(0, 0, 0)" : "rgb(255, 255, 255)";
+    for (const s of ["html", "body", ".hero", ".specimen"])
+      await expect(page.locator(s)).toHaveCSS("background-color", rgb);
+    await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
+      "content",
+      theme === "dark" ? "#000000" : "#ffffff",
+    );
     const report = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
       .analyze();

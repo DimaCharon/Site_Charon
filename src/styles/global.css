@@ -15,8 +15,8 @@
   unicode-range: U+0000-024F, U+2000-206F, U+2116, U+2192, U+2197;
 }
 :root {
-  --bg: #0d0e10;
-  --bg-deep: #0b0c0e;
+  --bg: #000000;
+  --bg-deep: var(--bg);
   --panel: #151619;
   --panel-raised: #1c1d21;
   --text: #f0f0f3;
@@ -28,7 +28,8 @@
   --button: #c5b7ef;
   --accent-tint: rgba(194, 178, 236, 0.08);
   --green: #90bca3;
-  --header: rgba(13, 14, 16, 0.89);
+  --header: rgba(0, 0, 0, 0.9);
+  --stage-light: rgba(180, 163, 222, 0.17);
   --grid: rgba(182, 181, 199, 0.055);
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --gutter: clamp(24px, 5vw, 88px);
@@ -39,8 +40,8 @@
   text-rendering: optimizeLegibility;
 }
 :root[data-theme="light"] {
-  --bg: #efeff1;
-  --bg-deep: #e9e9ec;
+  --bg: #ffffff;
+  --bg-deep: var(--bg);
   --panel: #f6f6f8;
   --panel-raised: #e6e5eb;
   --text: #222228;
@@ -52,7 +53,8 @@
   --button: #c2b2e7;
   --accent-tint: rgba(114, 87, 153, 0.08);
   --green: #487c61;
-  --header: rgba(239, 239, 241, 0.9);
+  --header: rgba(255, 255, 255, 0.92);
+  --stage-light: rgba(129, 116, 155, 0.13);
   --grid: rgba(71, 65, 86, 0.075);
   color-scheme: light;
 }
@@ -60,6 +62,7 @@
   box-sizing: border-box;
 }
 html {
+  background-color: var(--bg);
   scroll-behavior: smooth;
   scroll-padding-top: 96px;
 }
@@ -138,7 +141,15 @@ input:focus-visible,
   transform: none;
 }
 .shell {
-  width: calc(100% - var(--gutter) * 2);
+  width: calc(
+    100% -
+      max(
+        var(--gutter),
+        env(safe-area-inset-left),
+        env(safe-area-inset-right)
+      ) *
+      2
+  );
   max-width: 1490px;
   margin-inline: auto;
 }
@@ -567,6 +578,9 @@ input:focus-visible,
   height: 4px;
   border-radius: 50%;
   background: var(--accent);
+}
+.studio-poster {
+  display: contents;
 }
 .scene-host,
 .artifact-poster {

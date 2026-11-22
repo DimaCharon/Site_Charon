@@ -173,25 +173,17 @@ html:not([data-client="true"]) .hero-visual {
   opacity: 0.65;
 }
 .specimen {
-  --soft: #545160;
-  --muted: #45424d;
-  --text: #25232b;
-  --accent: #59496f;
-  --line: #b3afb9;
-  --bg: #dcdbe0;
-  --panel: #e8e6eb;
-  --panel-raised: #edeaf0;
-  --accent-tint: #6d5a821a;
-  --green: #456453;
-  color-scheme: light;
   color: var(--text);
   padding: 0 !important;
-  border: 1px solid #b9b5c2;
-  border-radius: 4px;
+  border: 1px solid var(--sheet-rule);
+  border-radius: 6px;
   isolation: isolate;
   overflow: hidden;
-  background-color: #d8d6dd;
-  background-image: linear-gradient(128deg, #e7e6e9, #d2cdd9 69%, #dcdbe0);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 63% 42%, var(--stage-light), transparent 67%),
+    linear-gradient(126deg, transparent 19%, var(--hair) 48%, transparent 75%);
+  box-shadow: inset 0 1px 0 var(--hair);
 }
 .specimen-head,
 .specimen-foot {
@@ -205,10 +197,10 @@ html:not([data-client="true"]) .hero-visual {
   padding: 11px 0;
 }
 .specimen-head {
-  border-bottom: 1px solid #2c273429;
+  border-bottom: 1px solid var(--hair);
 }
 .specimen-foot {
-  border-top: 1px solid #2c273429;
+  border-top: 1px solid var(--hair);
 }
 .specimen
   :is(
@@ -227,7 +219,7 @@ html:not([data-client="true"]) .hero-visual {
 }
 .specimen-foot > span:last-child {
   font: italic 15px/1.3 var(--display);
-  color: #484351;
+  color: var(--muted);
 }
 .specimen-ticks,
 .slip-ticks {
@@ -241,7 +233,7 @@ html:not([data-client="true"]) .hero-visual {
     currentColor 4px 6px,
     transparent 6px 10px
   );
-  color: #575461;
+  color: var(--muted);
   opacity: 0.7;
 }
 .specimen .viewport {
@@ -260,12 +252,16 @@ html:not([data-client="true"]) .hero-visual {
 }
 .specimen .scene-button,
 .specimen .activate-3d {
-  color: #37323f;
-  background: #e7e5eae6;
-  border-color: #a9a4b1;
+  color: var(--text);
+  background: var(--panel);
+  border-color: var(--sheet-rule);
+}
+.specimen .scene-button.selected {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 .specimen .scene-button:hover {
-  background: #f0eef2;
+  background: var(--panel-raised);
 }
 .specimen .rotate-hint,
 .specimen .viewport-top,
@@ -283,10 +279,10 @@ html:not([data-client="true"]) .hero-visual {
   bottom: 10px;
 }
 .specimen .orbit-floor i {
-  border-color: #72657d64;
+  border-color: var(--sheet-rule);
 }
 .specimen .target-dot {
-  border-color: #4b4554;
+  border-color: var(--muted);
 }
 .specimen .artifact-poster {
   filter: drop-shadow(0 13px 13px #35313b22);
@@ -1387,7 +1383,7 @@ html:not([data-client="true"]) .hero-visual {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
 }
 .product-identity.with-cover {
-  background-color: #d2ced9;
+  background-color: var(--panel);
 }
 .shelf-row .with-cover:after {
   display: none;
@@ -1395,6 +1391,7 @@ html:not([data-client="true"]) .hero-visual {
 /* Native links and the static catalogue stay useful when scripts are off. */
 html:not([data-client])
   :is(
+    .snow-trigger,
     .settings-trigger,
     .mobile-menu,
     .catalog-tools,

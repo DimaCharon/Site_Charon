@@ -1,3 +1,4 @@
+import { ProductSiteLink } from "./ProductSiteLink";
 import { useState, useRef, type ReactNode } from "react";
 import {
   ArrowLeft,
@@ -120,16 +121,16 @@ export function Catalog() {
       </div>
       <div className="shelf-list">
         {result.map(({ p, i }) => (
-          <a
-            className="shelf-row"
-            key={p.id}
-            href={pageHref("products/" + p.id)}
-          >
+          <article className="shelf-row" key={p.id}>
             <span className="shelf-index mono">{pad(i + 1)}</span>
             <ProductArt project={p} index={i} />
             <div className="shelf-body">
               <div className="folio-code">{p.category}</div>
-              <h2>{p.name}</h2>
+              <h2>
+                <a className="shelf-title" href={pageHref("products/" + p.id)}>
+                  {p.name}
+                </a>
+              </h2>
               <p>{p.short}</p>
             </div>
             <div className="shelf-end">
@@ -137,9 +138,14 @@ export function Catalog() {
               {p.offer.sale !== "showcase" && p.offer.price && (
                 <span>{p.offer.price}</span>
               )}
+              <ProductSiteLink p={p} />
             </div>
-            <ArrowUpRight className="shelf-arrow" size={20} />
-          </a>
+            <ArrowUpRight
+              className="shelf-arrow"
+              aria-hidden="true"
+              size={20}
+            />
+          </article>
         ))}
       </div>
       {!result.length && (
@@ -215,7 +221,9 @@ export function ProductAccess({ p }: { p: Project }) {
           ? w["store.external"]
           : o.sale === "inquiry"
             ? w["store.inquiry"]
-            : w["store.closed"]}
+            : o.siteUrl
+              ? new URL(o.siteUrl).hostname
+              : w["store.closed"]}
       </p>
       {o.sale !== "showcase" && o.terms && (
         <p className="slip-terms">{o.terms}</p>
@@ -240,16 +248,17 @@ export function ProductAccess({ p }: { p: Project }) {
             {w["store.ask"]}
           </AccessLink>
         )}
+        <ProductSiteLink p={p} prominent={o.sale === "showcase"} />
         {demo && (
           <AccessLink
             url={demo}
-            primary={o.sale === "showcase"}
+            primary={o.sale === "showcase" && !o.siteUrl}
             external={o.demo === "link"}
           >
             {w["store.demo"]}
           </AccessLink>
         )}
-        {!demo && o.sale === "showcase" && (
+        {!demo && !o.siteUrl && o.sale === "showcase" && (
           <a className="folio-inline" href={pageHref("products")}>
             {w["store.toProducts"]}
             <ArrowRight size={14} />
@@ -365,7 +374,7 @@ export function Manual({ updates = false }: { updates?: boolean }) {
         description={w[updates ? "library.updatesIntro" : "library.guideIntro"]}
       />
       <div className="manual-rows">
-        {(updates ? [1, 2, 3, 4] : [1, 2, 3]).map((i) => (
+        {(updates ? [5, 1, 2, 3, 4] : [1, 2, 3]).map((i) => (
           <section key={i}>
             <span className="folio-code">
               {updates ? w["library.version" + i] : pad(i)}

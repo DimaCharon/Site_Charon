@@ -1,10 +1,21 @@
 import { pageHref, readRoute } from "../config/routes";
 import { copy } from "../config/site";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowUpRight, SlidersHorizontal, Menu } from "lucide-react";
+import { ArrowUpRight, SlidersHorizontal, Menu, Snowflake } from "lucide-react";
 import { navigation } from "../config/site";
 import { Mark, Modal } from "./ui";
-export function Header({ onSettings }: { onSettings: () => void }) {
+type HeaderProps = {
+  onSettings: () => void;
+  snowOn: boolean;
+  snowLocked: boolean;
+  toggleSnow: () => void;
+};
+export function Header({
+  onSettings,
+  snowOn,
+  snowLocked,
+  toggleSnow,
+}: HeaderProps) {
   const path = readRoute();
   const pinned = path.startsWith("journal")
     ? "interests"
@@ -114,6 +125,19 @@ export function Header({ onSettings }: { onSettings: () => void }) {
             ))}
           </nav>
           <div className="header-actions">
+            <button
+              type="button"
+              className="snow-trigger"
+              aria-label={copy["settings.snow"]}
+              aria-pressed={snowOn}
+              disabled={snowLocked}
+              title={copy[snowLocked ? "settings.snowQuiet" : "settings.snow"]}
+              onClick={toggleSnow}
+            >
+              <Snowflake aria-hidden="true" size={16} strokeWidth={1.6} />
+              <span>{copy["nav.snow"]}</span>
+              <i className="snow-track" aria-hidden="true" />
+            </button>
             <button
               className="settings-trigger"
               aria-label={copy["settings.title"]}

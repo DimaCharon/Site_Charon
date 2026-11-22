@@ -1,4 +1,4 @@
-import { blankOffer } from "../../shared/offer.mjs";
+import { blankOffer, httpsLink } from "../../shared/offer.mjs";
 import { useRef, useState, useEffect } from "react";
 import {
   Plus,
@@ -266,6 +266,21 @@ export function ProjectEditor({
                 max={400}
                 multi
                 onChange={(short) => edit(p.id, { short })}
+              />
+              <Field
+                label="Сайт продукта"
+                type="url"
+                value={p.offer.siteUrl}
+                max={1200}
+                placeholder="https://…"
+                hint={
+                  p.offer.siteUrl.trim() && !httpsLink(p.offer.siteUrl.trim())
+                    ? "Нужен полный HTTPS-адрес без логина и пароля."
+                    : "Необязательно. После публикации кнопка ведёт прямо на этот адрес. Очистите поле, чтобы убрать кнопку."
+                }
+                onChange={(siteUrl) =>
+                  edit(p.id, { offer: { ...p.offer, siteUrl } })
+                }
               />
               <div className="cms-pair">
                 <Select

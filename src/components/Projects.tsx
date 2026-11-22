@@ -1,3 +1,4 @@
+import { ProductSiteLink } from "./ProductSiteLink";
 import { pageHref } from "../config/routes";
 import { copy } from "../config/site";
 import { useRailDrag } from "../hooks/gestures";
@@ -153,6 +154,7 @@ export function ProjectCard({
           )}
         </h3>
         <p>{p.short}</p>
+        <ProductSiteLink p={p} words={words} prominent />
         <div className="card-links">
           {pageLink && (
             <a className="page-link" href={pageHref("products/" + p.id)}>
@@ -198,6 +200,7 @@ export function ProjectDossier({
         <span className="mono">{p.category}</span>
       </div>
       <p className="dossier-text">{p.description}</p>
+      <ProductSiteLink p={p} words={words} prominent />
       <h3 className="sub-label mono" hidden={!p.details.length}>
         {words["projects.text05"]}
       </h3>

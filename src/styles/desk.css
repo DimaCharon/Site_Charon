@@ -294,13 +294,11 @@
   aspect-ratio: 1.9;
   border-bottom: 0;
   border-right: 1px solid var(--line);
-  background: #cfcbd6;
+  background: var(--panel);
 }
-.ref-identity-object {
-  background: #d9d6de;
-}
+.ref-identity-object,
 .ref-orbit-atlas {
-  background: #16171b;
+  background: var(--bg-deep);
 }
 .ref-code {
   position: absolute;

@@ -74,8 +74,16 @@ test("Снег: выключен по умолчанию, запоминает �
     }),
     sw = page.getByRole("switch", { name: w["settings.snow"], exact: true });
   await expect(snow).toHaveCount(0);
+  const quick = page
+    .locator("header")
+    .getByRole("button", { name: w["settings.snow"], exact: true });
+  await expect(quick).toHaveAttribute("aria-pressed", "false");
+  await quick.click();
+  await expect(quick).toHaveAttribute("aria-pressed", "true");
   await settings.click();
-  await expect(sw).toHaveAttribute("aria-checked", "false");
+  await expect(sw).toHaveAttribute("aria-checked", "true");
+  await sw.click();
+  await expect(snow).toHaveCount(0);
   await sw.click();
   await page.keyboard.press("Escape");
   await expect(snow).toHaveCount(1);
@@ -99,12 +107,18 @@ test("Снег: выключен по умолчанию, запоминает �
   await expect(grains).toHaveCount(54);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(grains).toHaveCount(36);
+  await expect(quick).toBeInViewport();
+  await quick.click();
+  await expect(snow).toHaveCount(0);
+  await quick.click();
+  await expect(grains).toHaveCount(36);
   await page.locator("#brief-name").focus();
   await expect(snow).toHaveCSS("visibility", "hidden");
   await page.locator("#brief-name").blur();
   await expect(snow).toHaveCSS("visibility", "visible");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(snow).toHaveCount(0);
+  await expect(quick).toBeDisabled();
   await settings.click();
   await expect(sw).toBeDisabled();
   await page.keyboard.press("Escape");

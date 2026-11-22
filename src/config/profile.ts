@@ -36,6 +36,16 @@ function store(key: string, value: unknown) {
     /* Private browsing still supports this session. */
   }
 }
+const UI_KEY = "charon.ui.v2";
+function readPrefs(): Preferences {
+  const p = read(UI_KEY) as Partial<Preferences> | null;
+  return {
+    theme: p?.theme === "light" ? "light" : "dark",
+    snow: p?.snow === true,
+    cursor: typeof p?.cursor === "boolean" ? p.cursor : defaultPrefs.cursor,
+    motion: typeof p?.motion === "boolean" ? p.motion : defaultPrefs.motion,
+  };
+}
 export function usePreferences() {
   useEffect(() => {
     try {
@@ -44,15 +54,32 @@ export function usePreferences() {
       /* Read-only privacy modes. */
     }
   }, []);
-  const [prefs, setPrefs] = useState<Preferences>(() => {
-    const p = read("charon.ui.v2") as Partial<Preferences> | null;
-    return {
-      theme: p?.theme === "light" ? "light" : "dark",
-      snow: p?.snow === true,
-      cursor: typeof p?.cursor === "boolean" ? p.cursor : defaultPrefs.cursor,
-      motion: typeof p?.motion === "boolean" ? p.motion : defaultPrefs.motion,
+  const [prefs, setPrefs] = useState<Preferences>(readPrefs);
+  useEffect(() => {
+    const restore = () => {
+      const next = readPrefs();
+      setPrefs((old) =>
+        old.theme === next.theme &&
+        old.snow === next.snow &&
+        old.cursor === next.cursor &&
+        old.motion === next.motion
+          ? old
+          : next,
+      );
     };
-  });
+    const onReturn = (e: PageTransitionEvent) => {
+      if (e.persisted) restore();
+    };
+    const onStore = (e: StorageEvent) => {
+      if (e.key === UI_KEY || e.key === null) restore();
+    };
+    window.addEventListener("pageshow", onReturn);
+    window.addEventListener("storage", onStore);
+    return () => {
+      window.removeEventListener("pageshow", onReturn);
+      window.removeEventListener("storage", onStore);
+    };
+  }, []);
   const [systemReduce, setSystemReduce] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -72,8 +99,8 @@ export function usePreferences() {
     d.style.colorScheme = prefs.theme;
     document
       .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", prefs.theme === "dark" ? "#0d0e11" : "#eeedf1");
-    store("charon.ui.v2", prefs);
+      ?.setAttribute("content", prefs.theme === "dark" ? "#000000" : "#ffffff");
+    store(UI_KEY, prefs);
   }, [prefs, reduced]);
   return { prefs, setPrefs, reduced, systemReduce };
 }

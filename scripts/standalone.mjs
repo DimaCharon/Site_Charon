@@ -57,13 +57,18 @@ for (const name of ["manrope-cyrillic.woff2", "manrope-latin.woff2"]) {
     .replaceAll("./fonts/" + name, font);
 }
 const script = js.replace(/<\/script/gi, "<\\/script");
-const hash = createHash("sha256").update(script).digest("base64");
-const policy = `default-src 'none'; script-src 'sha256-${hash}'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src data: blob:; worker-src blob:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'`;
+const early = await readFile("public/appearance.js", "utf8");
+const hash = (s) => createHash("sha256").update(s).digest("base64");
+const policy = `default-src 'none'; script-src 'sha256-${hash(early)}' 'sha256-${hash(script)}'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src data: blob:; worker-src blob:; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'`;
 html = publishMetadata(html, content.copy)
   .replace(
     "<head>",
     () =>
       `<head><meta http-equiv="Content-Security-Policy" content="${policy}">`,
+  )
+  .replace(
+    /<script\b[^>]*\bsrc="[^"]*appearance\.js"[^>]*><\/script>/,
+    () => `<script>${early}</script>`,
   )
   .replace(/<script[^>]+src="[^"]+"[^>]*><\/script>/g, "")
   .replace(/<link[^>]+rel="(?:stylesheet|preload|modulepreload)"[^>]*>/g, "")

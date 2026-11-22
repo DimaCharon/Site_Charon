@@ -23,6 +23,7 @@ export type Offer = {
   sale: "showcase" | "inquiry" | "checkout";
   price: string;
   terms: string;
+  siteUrl: string;
   buyUrl: string;
   demo: "none" | "lab" | "link";
   demoUrl: string;

@@ -30,9 +30,16 @@ import "./styles/owner-and-gestures.css";
 import "./styles/projects-media.css";
 import "./styles/atelier.css";
 import "./styles/desk.css";
+import "./styles/edition.css";
 const OwnerPanel = lazy(() => import("./owner/OwnerPanel"));
-function Edition({ path }: { path: string }) {
-  const { prefs, setPrefs, reduced, systemReduce } = usePreferences();
+function Edition({
+  path,
+  appearance,
+}: {
+  path: string;
+  appearance: ReturnType<typeof usePreferences>;
+}) {
+  const { prefs, setPrefs, reduced, systemReduce } = appearance;
   const profile = publishedProfile;
   const [settings, setSettings] = useState(false),
     [owner, setOwner] = useState(false),
@@ -70,7 +77,12 @@ function Edition({ path }: { path: string }) {
       <a href={pageHref(path, "main")} className="skip-link">
         {copy["interface.text05"]}
       </a>
-      <Header onSettings={() => setSettings(true)} />
+      <Header
+        onSettings={() => setSettings(true)}
+        snowOn={prefs.snow && !reduced}
+        snowLocked={reduced}
+        toggleSnow={() => setPrefs((p) => ({ ...p, snow: !p.snow }))}
+      />
       <main id="main">
         {!path ? (
           <>
@@ -163,5 +175,6 @@ function Edition({ path }: { path: string }) {
 }
 export default function App() {
   const path = useRoute();
-  return <Edition key={path} path={path} />;
+  const appearance = usePreferences();
+  return <Edition key={path} path={path} appearance={appearance} />;
 }

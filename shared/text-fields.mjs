@@ -970,4 +970,41 @@ export const textFields = [
   },
   ...storefrontFields,
   ...deskFields,
+  // Defaults only for the new labels when reading a 3.1 content document.
+  {
+    key: "nav.snow",
+    group: "nav",
+    label: "Короткая надпись на кнопке снега",
+    max: 16,
+    legacyDefault: "Снег",
+  },
+  {
+    key: "store.site",
+    group: "store",
+    label: "Кнопка прямого перехода на сайт продукта",
+    max: 64,
+    legacyDefault: "На сайт продукта",
+  },
+  {
+    key: "library.version5",
+    group: "library",
+    label: "Пятая версия",
+    max: 28,
+    legacyDefault: "3.2",
+  },
+  {
+    key: "library.change5",
+    group: "library",
+    label: "Пятое обновление",
+    max: 90,
+    legacyDefault: "Две темы и прямой путь к продукту",
+  },
+  {
+    key: "library.change5Text",
+    group: "library",
+    label: "Текст пятого обновления",
+    max: 480,
+    legacyDefault:
+      "Чёрная и белая темы охватывают весь сайт, включая стенд со знаком. Снег включается в шапке. На телефоне обложки стали крупнее, а с карточки можно сразу перейти на сайт продукта, если автор добавил адрес.",
+  },
 ];

@@ -139,14 +139,22 @@ export function Viewport({
         <span> {copy["studio.objectIndex"]}</span>
         <i />
       </div>
-      <img
-        className={"artifact-poster " + (status === "ready" ? "hidden" : "")}
-        src={assetUrl("art/identity.webp")}
-        width="900"
-        height="680"
-        alt={copy["studio.text08"]}
-        fetchPriority="high"
-      />
+      <picture className="studio-poster">
+        {!expanded && !__CHARON_OFFLINE__ && (
+          <source
+            media="(max-width: 520px) and (max-resolution: 2dppx)"
+            srcSet={assetUrl("art/identity-720.webp")}
+          />
+        )}
+        <img
+          className={"artifact-poster " + (status === "ready" ? "hidden" : "")}
+          src={assetUrl("art/identity.webp")}
+          width="1080"
+          height="816"
+          alt={copy["studio.text08"]}
+          fetchPriority="high"
+        />
+      </picture>
       <div
         className="scene-host"
         ref={host}

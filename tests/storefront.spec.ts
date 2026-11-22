@@ -177,3 +177,63 @@ test("Старые закладки интересов и мира привод�
     await expect(page.locator("#" + id)).toBeInViewport();
   }
 });
+
+test("Сохранённая тема окрашивает вложенную статическую страницу ещё до запуска приложения", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem("charon.ui.v2", JSON.stringify({ theme: "light" })),
+  );
+  await page.route("**/assets/*.js", (r) => r.abort());
+  const id = content.projects[0]?.id;
+  await page.goto(id ? "/products/" + id + "/" : "/references/");
+  await expect(page.locator("html")).not.toHaveAttribute("data-client", "true");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.locator("body")).toHaveCSS(
+    "background-color",
+    "rgb(255, 255, 255)",
+  );
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
+    "content",
+    "#ffffff",
+  );
+});
+
+test("На телефоне постер подбирается по плотности; 3D не загружается без касания", async ({
+  browser,
+  baseURL,
+}) => {
+  for (const dpr of [2, 3]) {
+    const c = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      hasTouch: true,
+      isMobile: true,
+      deviceScaleFactor: dpr,
+    });
+    try {
+      const page = await c.newPage(),
+        requests: string[] = [];
+      page.on("request", (r) => requests.push(r.url()));
+      await page.goto(baseURL!);
+      await expect(page.locator(".viewport").first()).toHaveAttribute(
+        "data-state",
+        "idle",
+      );
+      const image = page.locator(".artifact-poster").first();
+      await expect
+        .poll(() =>
+          image.evaluate(
+            (el: HTMLImageElement) => el.complete && el.currentSrc,
+          ),
+        )
+        .toMatch(
+          dpr === 2 ? /\/art\/identity-720\.webp$/ : /\/art\/identity\.webp$/,
+        );
+      expect(
+        requests.filter((u) => /\/assets\/(geometry|webgl)-[^/]+\.js/.test(u)),
+      ).toEqual([]);
+    } finally {
+      await c.close();
+    }
+  }
+});

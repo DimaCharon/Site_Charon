@@ -402,3 +402,43 @@ test("В том числе проверочный CH1 не оставляет а
     );
   assert.deepEqual(await readdir(root), ["media"]);
 });
+
+test("Сайт продукта: независимая ссылка в подписываемом документе, старые карточки без адреса по-прежнему валидны", () => {
+  const old = structuredClone(original);
+  old.content.projects = [structuredClone(sample)];
+  delete old.content.projects[0].offer.siteUrl;
+  for (const f of textFields)
+    if (Object.hasOwn(f, "legacyDefault")) delete old.content.copy[f.key];
+  const clean = normalizeDocument(old);
+  assert.equal(clean.content.projects[0].offer.siteUrl, "");
+  assert.equal(clean.content.copy["store.site"], "На сайт продукта");
+  const next = structuredClone(clean),
+    offer = next.content.projects[0].offer;
+  const url = "https://product.example.test/studio?view=1#start";
+  offer.siteUrl = url;
+  const fromPatch = patchedDocument(clean, diffDocuments(clean, next));
+  assert.deepEqual(fromPatch.content.projects[0].offer, {
+    ...blankOffer(),
+    siteUrl: url,
+  });
+  assert.equal(
+    patchedDocument(fromPatch, diffDocuments(fromPatch, clean)).content
+      .projects[0].offer.siteUrl,
+    "",
+  );
+  for (const bad of [
+    "/path",
+    "http://example.test",
+    "not a URL",
+    "https://name:secret@example.test/",
+    "https://example.test/with spaces",
+    null,
+    42,
+  ]) {
+    offer.siteUrl = bad;
+    assert.throws(() => normalizeDocument(next), /адрес сайта продукта/);
+  }
+  offer.siteUrl = "";
+  offer.otherUrl = url;
+  assert.throws(() => normalizeDocument(next), /формат предложения/);
+});

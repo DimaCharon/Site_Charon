@@ -3,8 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0d0e11" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#000000" />
+    <script src="/appearance.js"></script>
     <meta
       name="description"
       content="Личная витрина Charon: сайты, AI-инструменты и автоматизация. Посмотрите проекты, попробуйте студию обложек и узнайте условия доступа."
@@ -26,7 +30,15 @@
     />
     <link
       rel="preload"
+      href="./art/identity-720.webp"
+      media="(max-width: 520px) and (max-resolution: 2dppx)"
+      as="image"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
       href="./art/identity.webp"
+      media="not all and (max-width: 520px) and (max-resolution: 2dppx)"
       as="image"
       fetchpriority="high"
     />

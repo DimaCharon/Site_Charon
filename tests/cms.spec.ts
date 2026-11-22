@@ -154,6 +154,24 @@ test("Редактор → подписанный комплект с фото �
     await dlg
       .getByLabel("Краткое описание", { exact: true })
       .fill("Тестовая обложка в проектном архиве.");
+    const external = "https://product.example.test/space?view=studio#start";
+    const opened: string[] = [];
+    await context.route("https://product.example.test/**", (r) => {
+      opened.push(r.request().url());
+      return r.fulfill({
+        contentType: "text/html",
+        body: "<title>Product destination</title>",
+      });
+    });
+    const siteField = dlg.getByLabel("Сайт продукта", { exact: true });
+    const sitePreview = dlg.locator(".cms-preview .product-site-link");
+    await siteField.fill("not a URL");
+    await expect(sitePreview).toHaveCount(0);
+    await siteField.fill(external);
+    await expect(sitePreview).toHaveAttribute("href", external);
+    await siteField.fill("");
+    await expect(sitePreview).toHaveCount(0);
+    await siteField.fill(external);
     await dlg.getByLabel("Категория", { exact: true }).fill("VISUAL STUDY");
     await dlg.getByRole("button", { name: "Лёд", exact: true }).click();
     await dlg
@@ -334,6 +352,10 @@ test("Редактор → подписанный комплект с фото �
     const cards = live.locator(".project-rail .project-card");
     await expect(cards).toHaveCount(oldCount + 1);
     await expect(cards.nth(at).locator("h3")).toHaveText("Орбитальный этюд");
+    await expect(cards.nth(at).locator(".product-site-link")).toHaveAttribute(
+      "href",
+      external,
+    );
     const picture = cards.nth(at).getByAltText("Гравированные орбиты");
     await picture.scrollIntoViewIfNeeded();
     await expect(picture).toHaveAttribute("src", /media\/[a-f0-9]{64}\.jpg$/);
@@ -344,8 +366,38 @@ test("Редактор → подписанный комплект с фото �
     await expect(live.locator("dialog .dossier-text")).toHaveText(
       "Проверяем переход из карточки в досье.",
     );
+    await expect(live.locator("dialog .product-site-link")).toHaveAttribute(
+      "href",
+      external,
+    );
     await live.keyboard.press("Escape");
-    await cards.nth(at).locator(".page-link").click();
+    await live.locator(".catalog-hop").click();
+    await live.setViewportSize({ width: 390, height: 844 });
+    const row = live
+      .locator(".shelf-row")
+      .filter({
+        has: live.getByRole("heading", {
+          name: "Орбитальный этюд",
+          exact: true,
+        }),
+      });
+    const direct = row.locator(".product-site-link");
+    await expect(direct).toHaveAttribute("href", external);
+    await expect(direct).toHaveAttribute("rel", "noopener noreferrer");
+    expect(opened).toEqual([]);
+    const [dest] = await Promise.all([
+      live.waitForEvent("popup"),
+      direct.click(),
+    ]);
+    await expect(dest).toHaveURL(external);
+    await expect(dest).toHaveTitle("Product destination");
+    expect(await dest.evaluate(() => window.opener === null)).toBe(true);
+    await dest.close();
+    await row.locator(".shelf-title").click();
+    await live.setViewportSize({ width: 1440, height: 960 });
+    await expect(
+      live.locator(".access-slip .product-site-link"),
+    ).toHaveAttribute("href", external);
     await expect(live.locator(".access-slip .slip-price")).toHaveText(
       "1 900 ₽ · однократно",
     );
@@ -379,6 +431,12 @@ test("Редактор → подписанный комплект с фото �
     await checkNoGPU(file);
     await file.goto(pathToFileURL(join(dir, "out/Charon.html")).href);
     await expect(file).toHaveTitle("Орбита & Charon");
+    await expect(
+      file
+        .locator(".project-rail .project-card")
+        .nth(at)
+        .locator(".product-site-link"),
+    ).toHaveAttribute("href", external);
     const embedded = file
       .locator(".project-rail .project-cover")
       .nth(content.projects.slice(0, at).filter((p: any) => p.cover).length);
