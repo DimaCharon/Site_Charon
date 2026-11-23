@@ -61,6 +61,19 @@ test("Бриф нормализуется и не требует бренд; с�
   ])
     assert.equal(checkBrief({ ...raw, ...bad }).ok, false);
 });
+test("Фильтр текста работает и на сервере, не блокируя обычные заявки", async () => {
+  for (const task of ["Нужен сайт, блядь", "Сделай п.и.з.д.а", "this is bullshit fuck", "aaaaaaaaaaaaaa", "https://a.ru https://b.ru https://c.ru https://d.ru"]) {
+    const candidate = { ...raw, task };
+    assert.equal(checkBrief(candidate).ok, false);
+    let calls = 0;
+    const response = await handleContact(request({ body: JSON.stringify(candidate) }), env, async () => { calls++; return Response.json({}); });
+    assert.equal(response.status, 422);
+    assert.equal(calls, 0);
+  }
+  for (const task of ["Художник: нужен сайт для студии", "Разработать сайт про хлеб и услуги", "Сайт с примерами https://example.org"]) {
+    assert.equal(checkBrief({ ...raw, task }).ok, true);
+  }
+});
 test("Доставка: ровно один sendMessage, только в личный чат из secret, без интерпретации разметки", async () => {
   let count = 0;
   const r = await handleContact(request(), env, async (u, opts) => {

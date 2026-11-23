@@ -234,10 +234,8 @@
   font-size: 30px;
   letter-spacing: -0.04em;
 }
-.sent-paper p {
-  margin: 10px auto 20px;
-  color: var(--muted);
-  max-width: 45ch;
+.sent-paper .button {
+  margin-top: 20px;
 }
 .direct-desk {
   margin: 24px auto 0;
@@ -406,16 +404,6 @@
   display: block;
   width: 100%;
   height: 100%;
-}
-.snow-crystal-one {
-  --crystal-x: 26%;
-  --crystal-size: 14px;
-  --crystal-phase: -27s;
-}
-.snow-crystal-two {
-  --crystal-x: 76%;
-  --crystal-size: 12px;
-  --crystal-phase: -4s;
 }
 .snow-film[data-paused="true"] * {
   animation-play-state: paused;

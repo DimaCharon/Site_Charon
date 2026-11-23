@@ -312,6 +312,18 @@ export const deskFields = [
     max: 180,
   },
   {
+    key: "brief.errLanguage",
+    group: "brief",
+    label: "Нецензурная лексика в заявке",
+    max: 180,
+  },
+  {
+    key: "brief.errSpam",
+    group: "brief",
+    label: "Подозрительное содержимое заявки",
+    max: 180,
+  },
+  {
     key: "brief.errBusy",
     group: "brief",
     label: "Ограничение частоты",

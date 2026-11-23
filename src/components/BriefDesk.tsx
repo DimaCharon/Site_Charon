@@ -44,6 +44,7 @@ export function BriefDesk() {
     [done, setDone] = useState(false),
     [ready, setReady] = useState(false),
     [error, setError] = useState<BriefField | null>(null),
+    [moderation, setModeration] = useState<"profanity" | "spam" | null>(null),
     [notice, setNotice] = useState("");
   const active = useRef<AbortController | null>(null),
     success = useRef<HTMLHeadingElement>(null);
@@ -71,11 +72,15 @@ export function BriefDesk() {
   });
   const edit = (k: keyof typeof fields, v: string) => {
     setFields((f) => ({ ...f, [k]: v }));
-    if (error === k) setError(null);
+    if (error === k) {
+      setError(null);
+      setModeration(null);
+    }
     setNotice("");
   };
-  const alert = (k: BriefField) => {
+  const alert = (k: BriefField, reason?: "profanity" | "spam") => {
     setError(k);
+    setModeration(reason || null);
     setNotice("");
     document.getElementById("brief-" + k)?.focus();
   };
@@ -85,10 +90,11 @@ export function BriefDesk() {
     const payload = { ...data(), website: trap, consent };
     const check = checkBrief(payload);
     if (!check.ok) {
-      alert(check.field);
+      alert(check.field, check.reason);
       return;
     }
     setError(null);
+    setModeration(null);
     setNotice("");
     const ctrl = new AbortController();
     active.current = ctrl;
@@ -112,6 +118,10 @@ export function BriefDesk() {
       }
       if (response.status === 503) {
         setNotice(w["brief.errUnavailable"]);
+        return;
+      }
+      if (response.status === 422) {
+        setNotice(w["brief.errForm"]);
         return;
       }
       if (
@@ -152,7 +162,7 @@ export function BriefDesk() {
   const problem = (key: BriefField) =>
     error === key ? (
       <small className="field-problem" id={"err-" + key}>
-        {w[errorKeys[key]]}
+        {w[moderation === "profanity" ? "brief.errLanguage" : moderation === "spam" ? "brief.errSpam" : errorKeys[key]]}
       </small>
     ) : null;
   const attrs = (key: BriefField) => ({
@@ -186,7 +196,6 @@ export function BriefDesk() {
           <h2 ref={success} tabIndex={-1}>
             {w["brief.received"]}
           </h2>
-          <p>{w["brief.receivedText"]}</p>
           <button
             className="button secondary"
             onClick={() => {

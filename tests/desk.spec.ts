@@ -88,7 +88,7 @@ test("Снег: выключен по умолчанию, запоминает �
   await page.keyboard.press("Escape");
   await expect(snow).toHaveCount(1);
   await expect(snow).toHaveCSS("pointer-events", "none");
-  await expect(snow.locator('.snow-crystal img[src*="snowflake.png"]')).toHaveCount(2);
+  await expect(snow.locator('.snow-crystal img[src*="snowflake.png"]')).toHaveCount(8);
   const grains = snow.locator(".snow-dust i:visible");
   await expect(grains).toHaveCount(84);
   const near = await grains.evaluateAll(

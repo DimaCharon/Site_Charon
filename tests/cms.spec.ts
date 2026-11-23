@@ -761,9 +761,11 @@ test("Рабочий бриф → обработчик → подтверждё�
     await expect(p.locator("#brief-name")).toBeFocused();
     await p.locator("#brief-name").fill("Тест");
     await p.locator("#brief-brand").fill("Тестовая студия");
-    await p
-      .locator("#brief-task")
-      .fill("Собрать страницу с трёхмерным знаком.");
+    await p.locator("#brief-task").fill("Сделай сайт, блядь");
+    await send.click();
+    await expect(p.locator("#err-task")).toHaveText(w["brief.errLanguage"]);
+    expect(posts).toBe(0);
+    await p.locator("#brief-task").fill("Собрать страницу с трёхмерным знаком.");
     await p.locator("#brief-reply").fill("bad");
     await send.click();
     await expect(p.locator("#brief-reply")).toBeFocused();
@@ -783,6 +785,7 @@ test("Рабочий бриф → обработчик → подтверждё�
     await expect(
       p.getByRole("heading", { name: w["brief.received"], exact: true }),
     ).toBeVisible();
+    await expect(p.locator(".sent-paper p")).toHaveCount(0);
     expect(messages).toHaveLength(1);
     expect(messages[0].text).toContain(
       "Референс: " + w["refs.identityTitle"] + " [identity-object]",

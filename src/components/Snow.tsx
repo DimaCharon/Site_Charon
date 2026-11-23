@@ -48,12 +48,19 @@ export function Snow() {
           <i key={i} style={s} />
         ))}
       </div>
-      <span className="snow-crystal snow-crystal-one">
-        <img src={assetUrl("art/snowflake.png")} alt="" />
-      </span>
-      <span className="snow-crystal snow-crystal-two">
-        <img src={assetUrl("art/snowflake.png")} alt="" />
-      </span>
+      {[8, 24, 39, 54, 70, 84, 95, 17].map((x, i) => (
+        <span
+          className="snow-crystal"
+          key={i}
+          style={{
+            "--crystal-x": `${x}%`,
+            "--crystal-size": `${[14, 16, 12, 15, 13, 17, 12, 15][i]}px`,
+            "--crystal-phase": `${-i * 5.75}s`,
+          } as CSSProperties}
+        >
+          <img src={assetUrl("art/snowflake.png")} alt="" />
+        </span>
+      ))}
     </div>
   );
 }

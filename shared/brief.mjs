@@ -8,6 +8,17 @@ export const briefLimits = Object.freeze({
 });
 const fields = Object.keys(briefLimits),
   keys = [...fields, "consent", "website"];
+// A conservative filter: check whole words, not arbitrary substrings inside
+// names or project titles. The same checks run in the form and in the Worker.
+const inappropriate = /(?:^|[^\p{L}\p{N}])(?:х[.\-_*]*[уy][.\-_*]*[йяеёию]|п[.\-_*]*[иi][.\-_*]*з[.\-_*]*д|б[.\-_*]*л[.\-_*]*[яa][.\-_*]*д|(?:за|вы|про|на|раз|пере)?[её][.\-_*]*б(?:а|у|и|л|н|т)|сука|суки|суку|мудак|гандон|пидор|fuck|shit|bitch)(?:[\p{L}\p{N}]*)?(?=$|[^\p{L}\p{N}])/iu;
+function textIssue(text) {
+  const clean = text.normalize("NFKC").replace(/[\u200b-\u200f\u2060\ufeff]/g, "");
+  if (inappropriate.test(clean)) return "profanity";
+  // Long repeated characters and link floods are common automated noise.
+  if (/(\S)\1{11,}/u.test(clean) || (clean.match(/https?:\/\/[^\s]+/gi) || []).length > 3)
+    return "spam";
+  return null;
+}
 export function checkBrief(raw) {
   if (
     !raw ||
@@ -32,6 +43,10 @@ export function checkBrief(raw) {
     )
       return { ok: false, field: k };
     value[k] = s;
+  }
+  for (const k of ["name", "brand", "task"]) {
+    const reason = textIssue(value[k]);
+    if (reason) return { ok: false, field: k, reason };
   }
   if (!value.name) return { ok: false, field: "name" };
   if (value.task.length < 6) return { ok: false, field: "task" };
