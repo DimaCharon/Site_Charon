@@ -78,10 +78,8 @@ export function Footer({ onOwner }: { onOwner: () => void }) {
             ["about", "nav.about"],
             ["references", "refs.title"],
             ["contacts", "nav.contacts"],
-            ["lab", "lab.title"],
             ["journal", "library.notes"],
             ["guide", "library.guide"],
-            ["updates", "library.updates"],
           ].map(([path, key]) => (
             <a key={path} href={pageHref(path)}>
               {copy[key]}

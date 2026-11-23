@@ -22,7 +22,7 @@ import {
   NotePage,
   Manual,
 } from "./components/Showroom";
-import { CoverLab, LabInvitation } from "./components/CoverLab";
+import { CoverLab } from "./components/CoverLab";
 import "./styles/global.css";
 import "./styles/sections.css";
 import "./styles/responsive.css";
@@ -94,7 +94,6 @@ function Edition({
               }
             />
             <Projects onOpen={setProject} />
-            <LabInvitation />
             <AboutTeaser />
           </>
         ) : path === "contacts" ? (
@@ -133,8 +132,8 @@ function Edition({
           </>
         ) : n >= 0 ? (
           <NotePage index={n} />
-        ) : path === "guide" || path === "updates" ? (
-          <Manual updates={path === "updates"} />
+        ) : path === "guide" ? (
+          <Manual />
         ) : (
           <div className="shell paper-view">
             <PageLead

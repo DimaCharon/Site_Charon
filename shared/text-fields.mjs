@@ -87,6 +87,12 @@ export const textFields = [
     max: 36,
   },
   {
+    key: "hero.order",
+    group: "hero",
+    label: "Кнопка заказа сайта",
+    max: 36,
+  },
+  {
     key: "hero.secondary",
     group: "hero",
     label: "Авторская фраза под первым экраном",

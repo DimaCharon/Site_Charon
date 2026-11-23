@@ -603,3 +603,38 @@
     display: none !important;
   }
 }
+
+/* The order action remains close to the first-screen project link on all sizes. */
+.hero-order {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 46px;
+  padding: 0 20px;
+  border: 1px solid var(--accent);
+  border-radius: 30px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.2;
+  transition: background 0.2s, color 0.2s;
+}
+.hero-order:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+.hero-order:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (max-width: 720px) {
+  .atelier-hero .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-order {
+    min-height: 46px;
+    padding-inline: 18px;
+  }
+}

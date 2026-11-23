@@ -16,6 +16,7 @@ for (const [name, mime] of [
   ["art/identity.webp", "image/webp"],
   ["art/studio-lut.png", "image/png"],
   ["art/brushed.webp", "image/webp"],
+  ["art/snowflake.png", "image/png"],
   ...(hasMascot ? [["models/charon.glb", "model/gltf-binary"]] : []),
 ])
   embedded[name] =

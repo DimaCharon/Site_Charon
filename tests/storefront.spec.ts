@@ -123,7 +123,7 @@ test("Автономный файл: каталог, демо и возврат 
     await page.locator(".shelf-row").first().click();
     await expect(page.locator("main h1")).toHaveText(content.projects[0].name);
   }
-  await page.locator('.footer-directory a[href="#/lab"]').click();
+  await page.goto(pathToFileURL(resolve("out/Charon.html")).href + "#/lab");
   await expect(page.locator("main h1")).toHaveText(w["lab.title"]);
   const pending = page.waitForEvent("download");
   await page.getByRole("button", { name: w["lab.save"] }).click();
@@ -142,7 +142,7 @@ test("Доступность дополнительных страниц и мо
     "lab",
     "journal",
     "guide",
-    "updates",
+    "about",
     "references",
     "contacts",
     ...content.projects.slice(0, 1).map((p: any) => "products/" + p.id),
@@ -236,4 +236,18 @@ test("На телефоне постер подбирается по плотн�
       await c.close();
     }
   }
+});
+
+test("На первом экране есть заказ сайта, а лишние ссылки убраны из подвала", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto("/");
+  await expect(page.locator(".hero-order")).toHaveText(w["hero.order"]);
+  await expect(page.locator(".hero-order")).toHaveAttribute("href", "./contacts/");
+  await expect(page.locator(".lab-invitation")).toHaveCount(0);
+  await expect(page.locator('.footer-directory a[href="./lab/"]')).toHaveCount(0);
+  await expect(page.locator('.footer-directory a[href="./updates/"]')).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+  await page.locator(".hero-order").click();
+  await expect(page).toHaveURL(/\/contacts\/$/);
+  await expect(page.locator("#brief-name")).toBeVisible();
 });

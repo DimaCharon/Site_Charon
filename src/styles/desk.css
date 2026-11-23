@@ -396,11 +396,26 @@
 .snow-crystal {
   position: absolute;
   top: 0;
-  left: 78%;
-  width: 13px;
-  height: 13px;
+  left: var(--crystal-x);
+  width: var(--crystal-size);
+  height: var(--crystal-size);
   opacity: 0;
-  animation: desk-crystal 39s linear -3s infinite;
+  animation: desk-crystal 46s linear var(--crystal-phase) infinite;
+}
+.snow-crystal img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.snow-crystal-one {
+  --crystal-x: 26%;
+  --crystal-size: 14px;
+  --crystal-phase: -27s;
+}
+.snow-crystal-two {
+  --crystal-x: 76%;
+  --crystal-size: 12px;
+  --crystal-phase: -4s;
 }
 .snow-film[data-paused="true"] * {
   animation-play-state: paused;

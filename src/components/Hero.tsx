@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowDown, ArrowDownRight, Aperture } from "lucide-react";
+import { ArrowDown, ArrowDownRight, ArrowUpRight, Aperture } from "lucide-react";
 import { copy, projects } from "../config/site";
+import { pageHref } from "../config/routes";
 import { Magnetic } from "./ui";
 import { Viewport, StudioModal } from "./Viewport";
 export function Hero({
@@ -56,6 +57,10 @@ export function Hero({
                 {copy["hero.primary"]}
                 <ArrowDownRight size={17} />
               </Magnetic>
+              <a className="hero-order" href={pageHref("contacts")}>
+                {copy["hero.order"]}
+                <ArrowUpRight size={17} aria-hidden="true" />
+              </a>
             </div>
             <div
               role="group"

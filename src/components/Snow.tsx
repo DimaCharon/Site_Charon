@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { Snowflake } from "lucide-react";
+import { assetUrl } from "../config/routes";
 // A deterministic field with distant, middle and foreground grains. Every prefix
 // covers the viewport, so shrinking to a tablet or phone doesn't leave an empty side.
 const layers = [
@@ -48,8 +48,11 @@ export function Snow() {
           <i key={i} style={s} />
         ))}
       </div>
-      <span className="snow-crystal">
-        <Snowflake size={13} strokeWidth={1.55} />
+      <span className="snow-crystal snow-crystal-one">
+        <img src={assetUrl("art/snowflake.png")} alt="" />
+      </span>
+      <span className="snow-crystal snow-crystal-two">
+        <img src={assetUrl("art/snowflake.png")} alt="" />
       </span>
     </div>
   );

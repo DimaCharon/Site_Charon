@@ -4,7 +4,6 @@ export const fixedPages = [
   "lab",
   "journal",
   "guide",
-  "updates",
   "contacts",
   "references",
   "about",
@@ -49,7 +48,6 @@ export function pageMeta(path, c, profile) {
       lab: ["lab.title", "lab.intro"],
       journal: ["library.notes", "library.notesIntro"],
       guide: ["library.guide", "library.guideIntro"],
-      updates: ["library.updates", "library.updatesIntro"],
       about: ["about.title", "about.description"],
     }[section];
     if (item) {
