@@ -92,7 +92,9 @@ export async function handleContact(req, env, send = fetch) {
       "https://api.telegram.org/bot" + token + "/sendMessage",
       {
         method: "POST",
-        redirect: "error",
+        // Workers supports manual rather than "error"; never follow a redirect
+        // because the upstream URL contains the bot token. Non-2xx is rejected below.
+        redirect: "manual",
         signal: AbortSignal.timeout(8000),
         headers: { "content-type": "application/json" },
         body: JSON.stringify({

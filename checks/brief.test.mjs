@@ -66,7 +66,7 @@ test("Доставка: ровно один sendMessage, только в лич�
   const r = await handleContact(request(), env, async (u, opts) => {
     count++;
     assert.equal(u, "https://api.telegram.org/bot" + token + "/sendMessage");
-    assert.equal(opts.redirect, "error");
+    assert.equal(opts.redirect, "manual");
     const data = JSON.parse(opts.body);
     assert.equal(data.chat_id, env.TELEGRAM_CHAT_ID);
     assert.equal(data.text, briefText(checkBrief(raw).value));
@@ -130,6 +130,7 @@ test("Ошибка/тайм-аут/неподтверждённое сообще
         ok: true,
         result: { message_id: 123, chat: { id: 54321 } },
       }),
+    async () => new Response("", { status: 302, headers: { location: "https://elsewhere.test/" } }),
     async () => new Response("", { status: 429 }),
   ]) {
     const r = await handleContact(request(), env, send);
